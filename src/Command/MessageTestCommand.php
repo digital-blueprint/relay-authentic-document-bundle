@@ -8,10 +8,10 @@ declare(strict_types=1);
  * bin/console dbp:message-test
  */
 
-namespace DBP\API\EgizImageBundle\Command;
+namespace DBP\API\AuthenticDocumentBundle\Command;
 
 use DBP\API\CoreBundle\Service\PersonProviderInterface;
-use DBP\API\EgizImageBundle\Message\EgizImageRequest;
+use DBP\API\AuthenticDocumentBundle\Message\AuthenticDocumentRequestMessage;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -60,7 +60,7 @@ class MessageTestCommand extends Command
             + $delayInterval->i * 60 + $delayInterval->s;
         dump($seconds);
 
-        $this->bus->dispatch(new EgizImageRequest($person, $date), [
+        $this->bus->dispatch(new AuthenticDocumentRequestMessage($person, $date), [
             // wait 5 seconds before processing
             new DelayStamp($seconds * 1000),
         ]);

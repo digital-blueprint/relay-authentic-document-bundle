@@ -24,7 +24,7 @@ Enable this bundle in `./config/bundles.php` by adding this element to the array
 ...
     return [
         ...
-        DBP\API\EgizImageBundle\DbpEgizImageBundle::class => ['all' => true],
+        DBP\API\AuthenticDocumentBundle\DbpAuthenticDocumentBundle::class => ['all' => true],
     ];
 }
 ```

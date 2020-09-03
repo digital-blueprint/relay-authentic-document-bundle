@@ -5,16 +5,16 @@ declare(strict_types=1);
  * Egiz Image API service.
  */
 
-namespace DBP\API\EgizImageBundle\Service;
+namespace DBP\API\AuthenticDocumentBundle\Service;
 
 
 use DBP\API\CoreBundle\Service\PersonProviderInterface;
-use DBP\API\EgizImageBundle\Entity\AuthenticImageRequest;
-use DBP\API\EgizImageBundle\Message\EgizImageRequest;
+use DBP\API\AuthenticDocumentBundle\Entity\AuthenticDocumentRequest;
+use DBP\API\AuthenticDocumentBundle\Message\AuthenticDocumentRequestMessage;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
 
-class EgizImageApi
+class AuthenticDocumentApi
 {
     /**
      * @var MessageBusInterface
@@ -33,7 +33,7 @@ class EgizImageApi
         $this->personProvider = $personProvider;
     }
 
-    public function createAuthenticImageRequest(AuthenticImageRequest $authenticImageRequest)
+    public function createAuthenticDocumentRequestMessage(AuthenticDocumentRequest $authenticImageRequest)
     {
         $person = $this->personProvider->getCurrentPerson();
 
@@ -47,7 +47,7 @@ class EgizImageApi
             + $delayInterval->i * 60 + $delayInterval->s;
         dump($seconds);
 
-        $this->bus->dispatch(new EgizImageRequest($person, $date), [
+        $this->bus->dispatch(new AuthenticDocumentRequestMessage($person, $date), [
             // wait 5 seconds before processing
             new DelayStamp($seconds * 1000)
         ]);

@@ -28,12 +28,12 @@
     ],
     "autoload": {
         "psr-4": {
-            "DBP\\API\\EgizImageBundle\\": "src/"
+            "DBP\\API\\AuthenticDocumentBundle\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-          "DBP\\API\\EgizImageBundle\\Tests\\": "tests/"
+          "DBP\\API\\AuthenticDocumentBundle\\Tests\\": "tests/"
         }
     },
     "config": {

@@ -1,20 +1,20 @@
 services:
-  DBP\API\EgizImageBundle\Service\EgizImageApi:
+  DBP\API\AuthenticDocumentBundle\Service\AuthenticDocumentApi:
     public: false
     autowire: true
 
-  DBP\API\EgizImageBundle\DataPersister\:
+  DBP\API\AuthenticDocumentBundle\DataPersister\:
     resource: '../../DataPersister'
     tags: ['api_platform.data_persister']
     autowire: true
 
-  DBP\API\EgizImageBundle\MessageHandler\EgizImageRequestHandler:
+  DBP\API\AuthenticDocumentBundle\MessageHandler\AuthenticDocumentRequestHandler:
     public: false
     autowire: true
     autoconfigure: true
     tags: ['messenger.message_handler']
 
-  DBP\API\EgizImageBundle\Command\MessageTestCommand:
+  DBP\API\AuthenticDocumentBundle\Command\MessageTestCommand:
     public: false
     autowire: true
     autoconfigure: true

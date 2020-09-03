@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace DBP\API\EgizImageBundle\Message;
+namespace DBP\API\AuthenticDocumentBundle\Message;
 
 use DBP\API\CoreBundle\Entity\Person;
 
-class EgizImageRequest
+class AuthenticDocumentRequestMessage
 {
     /**
      * @var Person

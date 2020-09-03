@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace DBP\API\EgizImageBundle\Entity;
+namespace DBP\API\AuthenticDocumentBundle\Entity;
 
 use ApiPlatform\Core\Annotation\ApiProperty;
 use ApiPlatform\Core\Annotation\ApiResource;
@@ -14,14 +14,14 @@ use Symfony\Component\Serializer\Annotation\Groups;
  * @ApiResource(
  *     collectionOperations={"get", "post"},
  *     itemOperations={"get"},
- *     iri="https://schema.tugraz.at/AuthenticImageRequest",
- *     normalizationContext={"jsonld_embed_context"=true, "groups"={"AuthenticImage:output"}}
+ *     iri="https://schema.tugraz.at/AuthenticDocumentRequest",
+ *     normalizationContext={"jsonld_embed_context"=true, "groups"={"AuthenticDocument:output"}}
  * )
  */
-class AuthenticImageRequest
+class AuthenticDocumentRequest
 {
     /**
-     * @Groups({"AuthenticImage:output"})
+     * @Groups({"AuthenticDocument:output"})
      * @ApiProperty(identifier=true,iri="https://schema.org/identifier")
      * Note: Every entity needs an identifier!
      */
@@ -29,7 +29,7 @@ class AuthenticImageRequest
 
     /**
      * @ApiProperty(iri="http://schema.org/name")
-     * @Groups({"AuthenticImage:output"})
+     * @Groups({"AuthenticDocument:output"})
      *
      * @var string
      */
