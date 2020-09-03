@@ -1,0 +1,20 @@
+services:
+  DBP\API\EgizImageBundle\Service\EgizImageApi:
+    public: false
+    autowire: true
+
+  DBP\API\EgizImageBundle\DataPersister\:
+    resource: '../../DataPersister'
+    tags: ['api_platform.data_persister']
+    autowire: true
+
+  DBP\API\EgizImageBundle\MessageHandler\EgizImageRequestHandler:
+    public: false
+    autowire: true
+    autoconfigure: true
+    tags: ['messenger.message_handler']
+
+  DBP\API\EgizImageBundle\Command\MessageTestCommand:
+    public: false
+    autowire: true
+    autoconfigure: true
