@@ -26,11 +26,15 @@ final class AuthenticDocumentRequestDataPersister implements DataPersisterInterf
      * @param AuthenticDocumentRequest $authenticImageRequest
      *
      * @return AuthenticDocumentRequest
+     * @throws \DBP\API\CoreBundle\Exception\ItemNotStoredException
      */
     public function persist($authenticImageRequest)
     {
         $api = $this->api;
         $api->createAuthenticDocumentRequestMessage($authenticImageRequest);
+
+        // TODO: Is there a better identifier (not that we would need one)
+        $authenticImageRequest->setIdentifier($authenticImageRequest->getType() . "-" . time());
 
         return $authenticImageRequest;
     }

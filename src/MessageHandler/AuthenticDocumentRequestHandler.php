@@ -5,17 +5,20 @@ declare(strict_types=1);
 namespace DBP\API\AuthenticDocumentBundle\MessageHandler;
 
 use DBP\API\AuthenticDocumentBundle\Message\AuthenticDocumentRequestMessage;
+use DBP\API\AuthenticDocumentBundle\Service\AuthenticDocumentApi;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 
 class AuthenticDocumentRequestHandler implements MessageHandlerInterface
 {
+    private $api;
+
+    public function __construct(AuthenticDocumentApi $api)
+    {
+        $this->api = $api;
+    }
+
     public function __invoke(AuthenticDocumentRequestMessage $message)
     {
-        // TODO: Check at egiz server if image is already available
-        dump($message);
-
-        // TODO: If image is available persist it and notify the user
-
-        // TODO: If image is not available dispatch a new delayed message
+        $this->api->handleRequestMessage($message);
     }
 }

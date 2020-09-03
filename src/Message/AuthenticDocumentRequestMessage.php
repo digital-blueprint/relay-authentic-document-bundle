@@ -14,21 +14,71 @@ class AuthenticDocumentRequestMessage
     private $person;
 
     /**
+     * @var string
+     */
+    private $documentToken;
+
+    /**
+     * @var string
+     */
+    private $urlAttribute;
+
+    /**
      * @var \DateTime
      */
     private $estimatedResponseDate;
 
+    /**
+     * @var int
+     */
     private $retry = 0;
 
-    public function __construct(Person $person, \DateTime $estimatedResponseDate, int $retry = 0)
+    public function __construct(Person $person, $documentToken, $urlAttribute, \DateTime $estimatedResponseDate, int $retry = 0)
     {
         $this->person = $person;
+        $this->documentToken = $documentToken;
+        $this->urlAttribute = $urlAttribute;
         $this->estimatedResponseDate = $estimatedResponseDate;
         $this->retry = $retry;
     }
 
-    public function getContent(): string
+    /**
+     * @return Person
+     */
+    public function getPerson(): Person
     {
-        return $this->content;
+        return $this->person;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDocumentToken(): string
+    {
+        return $this->documentToken;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUrlAttribute(): string
+    {
+        return $this->urlAttribute;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getEstimatedResponseDate(): \DateTime
+    {
+        return $this->estimatedResponseDate;
+    }
+
+    /**
+     * @return int
+     */
+    public function getRetry(): int
+    {
+        return $this->retry;
     }
 }

@@ -12,7 +12,16 @@ use Symfony\Component\Serializer\Annotation\Groups;
  * Note: We need a "collectionOperations" setting for "get" to get an "entryPoint" in JSONLD.
  *
  * @ApiResource(
- *     collectionOperations={"get", "post"},
+ *     collectionOperations={"get",
+ *         "post"={
+ *             "method"="POST",
+ *             "openapi_context"={
+ *                 "parameters"={
+ *                    {"name"="token", "in"="body", "description"="Token", "type"="string", "example"="photo-jpeg-available-token", "required"="true"}
+ *                 }
+ *             },
+ *         },
+      },
  *     itemOperations={"get"},
  *     iri="https://schema.tugraz.at/AuthenticDocumentRequest",
  *     normalizationContext={"jsonld_embed_context"=true, "groups"={"AuthenticDocument:output"}}
@@ -30,10 +39,25 @@ class AuthenticDocumentRequest
     /**
      * @ApiProperty(iri="http://schema.org/name")
      * @Groups({"AuthenticDocument:output"})
+     * @ApiProperty(
+     *     attributes={
+     *         "openapi_context"={
+     *             "type"="string",
+     *             "example"="photo-jpeg-available-token"
+     *         }
+     *     }
+     * )
+     * @var string
+     */
+    private $token;
+
+    /**
+     * @ApiProperty(iri="http://schema.org/Text")
+     * @Groups({"AuthenticDocument:output"})
      *
      * @var string
      */
-    private $name;
+    private $type;
 
     public function setIdentifier(string $identifier): self
     {
@@ -47,14 +71,26 @@ class AuthenticDocumentRequest
         return $this->identifier;
     }
 
-    public function getName(): ?string
+    public function getToken(): ?string
     {
-        return $this->name;
+        return $this->token;
     }
 
-    public function setName(string $name): self
+    public function setToken(string $token): self
     {
-        $this->name = $name;
+        $this->token = $token;
+
+        return $this;
+    }
+
+    public function getType(): ?string
+    {
+        return $this->type;
+    }
+
+    public function setType(string $type): self
+    {
+        $this->type = $type;
 
         return $this;
     }
