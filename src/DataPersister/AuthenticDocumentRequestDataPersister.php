@@ -32,9 +32,10 @@ final class AuthenticDocumentRequestDataPersister implements DataPersisterInterf
     {
         $api = $this->api;
         $api->createAuthenticDocumentRequestMessage($authenticImageRequest);
+        $type = $authenticImageRequest->getType() ?? "generic";
 
         // TODO: Is there a better identifier (not that we would need one)
-        $authenticImageRequest->setIdentifier($authenticImageRequest->getType() . "-" . time());
+        $authenticImageRequest->setIdentifier($type . "-" . time());
 
         return $authenticImageRequest;
     }
