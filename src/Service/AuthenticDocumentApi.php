@@ -107,13 +107,21 @@ class AuthenticDocumentApi
             $seconds = 1;
 
             $person = $this->personProvider->getCurrentPerson();
-            $envelope = $this->bus->dispatch(new AuthenticDocumentRequestMessage($person, $documentToken, $urlAttribute, $date), [
+            $this->bus->dispatch(new AuthenticDocumentRequestMessage($person, $documentToken, $urlAttribute, $date), [
                 new DelayStamp($seconds * 1000)
             ]);
         } catch (RequestException $e) {
-            $response = $e->getResponse();
-            $body = $response->getBody();
-            $message = $body->getContents();
+            $headers = $e->getResponse()->getHeader("WWW-Authenticate");
+
+            if (count($headers) > 0) {
+                $message = $headers[0];
+
+                if (preg_match('/error_description="(.+?)"/', $message, $matches)) {
+                    $message = $matches[1];
+                }
+            } else {
+                $message = $e->getMessage();
+            }
 
             throw new ItemNotStoredException(sprintf("AuthenticDocumentRequest could not be stored! Message: %s", $message));
         } catch (ItemNotLoadedException $e) {

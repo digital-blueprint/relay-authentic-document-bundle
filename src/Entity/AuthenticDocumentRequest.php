@@ -15,9 +15,10 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *     collectionOperations={"get",
  *         "post"={
  *             "method"="POST",
+ *             "status"=202,
  *             "openapi_context"={
  *                 "parameters"={
- *                    {"name"="token", "in"="body", "description"="Token", "type"="string", "example"="photo-jpeg-available-token", "required"="true"}
+ *                    {"name"="body", "in"="body", "description"="Token", "type"="string", "example"={"token"="photo-jpeg-available-token", "type"="image"}, "required"="true"}
  *                 }
  *             },
  *         },

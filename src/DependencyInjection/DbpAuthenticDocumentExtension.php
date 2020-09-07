@@ -13,6 +13,13 @@ class DbpAuthenticDocumentExtension extends Extension
 {
     public function load(array $configs, ContainerBuilder $container)
     {
+        $pathsToHide = [
+            '/authentic_document_requests',
+            '/authentic_document_requests/{id}',
+        ];
+
+        $this->extendArrayParameter($container, 'dbp_api.paths_to_hide', $pathsToHide);
+
         $this->extendArrayParameter(
             $container, 'api_platform.resource_class_directories', [__DIR__.'/../Entity']);
 
