@@ -25,13 +25,13 @@ use Symfony\Component\Serializer\Annotation\Groups;
       },
  *     itemOperations={"get"},
  *     iri="https://schema.tugraz.at/AuthenticDocumentRequest",
- *     normalizationContext={"jsonld_embed_context"=true, "groups"={"AuthenticDocument:output"}}
+ *     normalizationContext={"jsonld_embed_context"=true, "groups"={"AuthenticDocument:output"}},
+ *     denormalizationContext={"groups"={"AuthenticDocument:input"}}
  * )
  */
 class AuthenticDocumentRequest
 {
     /**
-     * @Groups({"AuthenticDocument:output"})
      * @ApiProperty(identifier=true,iri="https://schema.org/identifier")
      * Note: Every entity needs an identifier!
      */
@@ -39,7 +39,7 @@ class AuthenticDocumentRequest
 
     /**
      * @ApiProperty(iri="http://schema.org/name")
-     * @Groups({"AuthenticDocument:output"})
+     * @Groups({"AuthenticDocument:output", "AuthenticDocument:input"})
      * @ApiProperty(
      *     attributes={
      *         "openapi_context"={
@@ -54,7 +54,7 @@ class AuthenticDocumentRequest
 
     /**
      * @ApiProperty(iri="http://schema.org/Text")
-     * @Groups({"AuthenticDocument:output"})
+     * @Groups({"AuthenticDocument:output", "AuthenticDocument:input"})
      *
      * @var string
      */
