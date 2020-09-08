@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 /**
- * Egiz Image API service.
+ * Egiz Document API service.
  */
 
 namespace DBP\API\AuthenticDocumentBundle\Service;
@@ -71,9 +71,15 @@ class AuthenticDocumentApi
         return new Client($client_options);
     }
 
-    public function createAuthenticDocumentRequestMessage(AuthenticDocumentRequest $authenticImageRequest)
+    /**
+     * Creates Symfony message and dispatch delayed message to download a document from egiz in the future
+     *
+     * @param AuthenticDocumentRequest $authenticDocumentRequest
+     * @throws ItemNotStoredException
+     */
+    public function createAuthenticDocumentRequestMessage(AuthenticDocumentRequest $authenticDocumentRequest)
     {
-        $token = $authenticImageRequest->getToken();
+        $token = $authenticDocumentRequest->getToken();
         // TODO: Do we need a setting for this url?
         $url = "https://eid.egiz.gv.at/documentHandler/documents/document";
 
@@ -147,9 +153,15 @@ class AuthenticDocumentApi
         }
     }
 
+    /**
+     * Handle Symfony Message AuthenticDocumentRequestMessage to download the document from the egiz server
+     *
+     * @param AuthenticDocumentRequestMessage $message
+     * @throws ItemNotLoadedException
+     */
     public function handleRequestMessage(AuthenticDocumentRequestMessage $message)
     {
-        // TODO: Check at egiz server if image is already available
+        // TODO: Check at egiz server if document is already available
         dump($message);
 
         $urlAttribute = $message->getUrlAttribute();
@@ -184,6 +196,6 @@ class AuthenticDocumentApi
             throw new ItemNotLoadedException(sprintf("Document could not be loaded! Message: %s", $e->getMessage()));
         }
 
-        // TODO: If image is not available dispatch a new delayed message
+        // TODO: If document is not available dispatch a new delayed message
     }
 }
