@@ -40,3 +40,28 @@ Add this bundle to `./symfony.lock`:
     },
 ...
 ```
+
+## Development
+
+The `console` shell script in the `docker` directory is running commands inside the php container.
+
+### Send test message
+
+```bash
+cd docker && ./console dbp:message-test
+```
+
+### Consume messages
+
+```bash
+cd docker && ./console messenger:consume async
+
+# you can stop the worker in another terminal
+cd docker && ./console messenger:stop-workers
+```
+
+only consume one message and quit worker:
+
+```bash
+cd docker && ./console messenger:consume async --limit=1
+```
