@@ -42,58 +42,38 @@ class AuthenticDocumentRequestMessage
         $this->retry = $retry;
     }
 
-    /**
-     * @return Person
-     */
-    public function getPerson(): Person
+    public function getPerson(): ?Person
     {
         return $this->person;
     }
 
-    /**
-     * @return string
-     */
     public function getDocumentToken(): string
     {
         return $this->documentToken;
     }
 
-    /**
-     * @return string
-     */
     public function getUrlAttribute(): string
     {
         return $this->urlAttribute;
     }
 
-    /**
-     * @return \DateTime
-     */
     public function getEstimatedResponseDate(): \DateTime
     {
         return $this->estimatedResponseDate;
     }
 
-    /**
-     * @return int
-     */
     public function getRetry(): int
     {
         return $this->retry;
     }
 
-    /**
-     * @param int $retry
-     */
     public function setRetry(int $retry): void
     {
         $this->retry = $retry;
     }
 
-    /**
-     */
     public function incRetry(): void
     {
-        $this->retry++;
+        ++$this->retry;
     }
 }

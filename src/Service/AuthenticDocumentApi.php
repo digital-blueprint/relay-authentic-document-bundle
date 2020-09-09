@@ -7,15 +7,14 @@ declare(strict_types=1);
 
 namespace DBP\API\AuthenticDocumentBundle\Service;
 
-
+use DBP\API\AuthenticDocumentBundle\Entity\AuthenticDocumentRequest;
+use DBP\API\AuthenticDocumentBundle\Message\AuthenticDocumentRequestMessage;
 use DBP\API\CoreBundle\Exception\ItemNotLoadedException;
 use DBP\API\CoreBundle\Exception\ItemNotStoredException;
 use DBP\API\CoreBundle\Helpers\JsonException;
 use DBP\API\CoreBundle\Helpers\Tools as CoreTools;
 use DBP\API\CoreBundle\Service\GuzzleLogger;
 use DBP\API\CoreBundle\Service\PersonProviderInterface;
-use DBP\API\AuthenticDocumentBundle\Entity\AuthenticDocumentRequest;
-use DBP\API\AuthenticDocumentBundle\Message\AuthenticDocumentRequestMessage;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
@@ -39,7 +38,6 @@ class AuthenticDocumentApi
     private $clientHandler;
     private $guzzleLogger;
 
-
     public function __construct(MessageBusInterface $bus, PersonProviderInterface $personProvider, GuzzleLogger $guzzleLogger)
     {
         $this->bus = $bus;
@@ -50,8 +48,6 @@ class AuthenticDocumentApi
 
     /**
      * Replace the guzzle client handler for testing.
-     *
-     * @param object|null $handler
      */
     public function setClientHandler(?object $handler)
     {
@@ -72,21 +68,20 @@ class AuthenticDocumentApi
     }
 
     /**
-     * Creates Symfony message and dispatch delayed message to download a document from egiz in the future
+     * Creates Symfony message and dispatch delayed message to download a document from egiz in the future.
      *
-     * @param AuthenticDocumentRequest $authenticDocumentRequest
      * @throws ItemNotStoredException
      */
     public function createAuthenticDocumentRequestMessage(AuthenticDocumentRequest $authenticDocumentRequest)
     {
         $token = $authenticDocumentRequest->getToken();
         // TODO: Do we need a setting for this url?
-        $url = "https://eid.egiz.gv.at/documentHandler/documents/document";
+        $url = 'https://eid.egiz.gv.at/documentHandler/documents/document';
 
         $client = $this->getClient();
         $options = [
             'headers' => [
-                'Authorization' => 'Bearer ' . $token,
+                'Authorization' => 'Bearer '.$token,
             ],
         ];
 
@@ -97,12 +92,12 @@ class AuthenticDocumentApi
             dump($data);
             // TODO: Do we always use photo-jpeg-requested?
 //            $documentRequestData = $data["urn:eidgvat:attributes.user.photo-jpeg-requested"];
-            $documentRequestData = $data["urn:eidgvat:attributes.user.photo-jpeg-available"];
+            $documentRequestData = $data['urn:eidgvat:attributes.user.photo-jpeg-available'];
 
-            $eta = $documentRequestData["eta"];
-            $date = new \DateTime($eta === null ? "now" : $eta);
-            $documentToken = $documentRequestData["document_token"];
-            $urlAttribute = $documentRequestData["urlsafe_attribute"];
+            $eta = $documentRequestData['eta'];
+            $date = new \DateTime($eta === null ? 'now' : $eta);
+            $documentToken = $documentRequestData['document_token'];
+            $urlAttribute = $documentRequestData['urlsafe_attribute'];
 
             $seconds = $date->getTimestamp() - time();
             if ($seconds < 0) {
@@ -116,10 +111,10 @@ class AuthenticDocumentApi
 //            $person = $this->personProvider->getCurrentPerson();
             $person = null;
             $this->bus->dispatch(new AuthenticDocumentRequestMessage($person, $documentToken, $urlAttribute, $date), [
-                new DelayStamp($seconds * 1000)
+                new DelayStamp($seconds * 1000),
             ]);
         } catch (RequestException $e) {
-            $headers = $e->getResponse()->getHeader("WWW-Authenticate");
+            $headers = $e->getResponse()->getHeader('WWW-Authenticate');
 
             if (count($headers) > 0) {
                 $message = $headers[0];
@@ -131,16 +126,15 @@ class AuthenticDocumentApi
                 $message = $e->getMessage();
             }
 
-            throw new ItemNotStoredException(sprintf("AuthenticDocumentRequest could not be stored! Message: %s", $message));
+            throw new ItemNotStoredException(sprintf('AuthenticDocumentRequest could not be stored! Message: %s', $message));
         } catch (ItemNotLoadedException $e) {
-            throw new ItemNotStoredException(sprintf("AuthenticDocumentRequest could not be stored! Message: %s", $e->getMessage()));
+            throw new ItemNotStoredException(sprintf('AuthenticDocumentRequest could not be stored! Message: %s', $e->getMessage()));
         } catch (GuzzleException $e) {
-            throw new ItemNotStoredException(sprintf("AuthenticDocumentRequest could not be stored! Message: %s", $e->getMessage()));
+            throw new ItemNotStoredException(sprintf('AuthenticDocumentRequest could not be stored! Message: %s', $e->getMessage()));
         }
     }
 
     /**
-     * @param ResponseInterface $response
      * @return mixed
      *
      * @throws ItemNotLoadedException
@@ -156,9 +150,8 @@ class AuthenticDocumentApi
     }
 
     /**
-     * Handle Symfony Message AuthenticDocumentRequestMessage to download the document from the egiz server
+     * Handle Symfony Message AuthenticDocumentRequestMessage to download the document from the egiz server.
      *
-     * @param AuthenticDocumentRequestMessage $message
      * @throws ItemNotLoadedException
      */
     public function handleRequestMessage(AuthenticDocumentRequestMessage $message)
@@ -175,7 +168,7 @@ class AuthenticDocumentApi
         $client = $this->getClient();
         $options = [
             'headers' => [
-                'Authorization' => 'Bearer ' . $documentToken,
+                'Authorization' => 'Bearer '.$documentToken,
             ],
         ];
 
@@ -184,18 +177,18 @@ class AuthenticDocumentApi
             $response = $client->request('GET', $url, $options);
             $data = $response->getBody()->getContents();
             // TODO: Store document
-            dump("Bytes received: " . strlen($data));
+            dump('Bytes received: '.strlen($data));
             // TODO: Notify user
         } catch (RequestException $e) {
             $response = $e->getResponse();
             $body = $response->getBody();
             $message = $body->getContents();
 
-            throw new ItemNotLoadedException(sprintf("Document could not be loaded! Message: %s", $message));
+            throw new ItemNotLoadedException(sprintf('Document could not be loaded! Message: %s', $message));
         } catch (ItemNotLoadedException $e) {
-            throw new ItemNotLoadedException(sprintf("Document could not be loaded! Message: %s", $e->getMessage()));
+            throw new ItemNotLoadedException(sprintf('Document could not be loaded! Message: %s', $e->getMessage()));
         } catch (GuzzleException $e) {
-            throw new ItemNotLoadedException(sprintf("Document could not be loaded! Message: %s", $e->getMessage()));
+            throw new ItemNotLoadedException(sprintf('Document could not be loaded! Message: %s', $e->getMessage()));
         }
 
         // TODO: If document is not available dispatch a new delayed message

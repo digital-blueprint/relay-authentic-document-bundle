@@ -39,4 +39,5 @@ class DbpAuthenticDocumentExtension extends Extension
         $oldValues = $container->getParameter($parameter);
         assert(is_array($oldValues));
         $container->setParameter($parameter, array_merge($oldValues, $values));
-    }}
+    }
+}

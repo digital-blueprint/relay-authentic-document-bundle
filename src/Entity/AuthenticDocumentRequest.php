@@ -48,6 +48,7 @@ class AuthenticDocumentRequest
      *         }
      *     }
      * )
+     *
      * @var string
      */
     private $token;
