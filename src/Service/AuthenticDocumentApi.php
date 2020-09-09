@@ -112,7 +112,9 @@ class AuthenticDocumentApi
             // TODO: Remove 1-sec-override to get the real delay
             $seconds = 1;
 
-            $person = $this->personProvider->getCurrentPerson();
+            // we currently doen't use a person
+//            $person = $this->personProvider->getCurrentPerson();
+            $person = null;
             $this->bus->dispatch(new AuthenticDocumentRequestMessage($person, $documentToken, $urlAttribute, $date), [
                 new DelayStamp($seconds * 1000)
             ]);
@@ -197,5 +199,11 @@ class AuthenticDocumentApi
         }
 
         // TODO: If document is not available dispatch a new delayed message
+        $newMessage = clone $message;
+        $newMessage->incRetry();
+
+//        $this->bus->dispatch(new AuthenticDocumentRequestMessage($person, $documentToken, $urlAttribute, $date), [
+//            new DelayStamp($seconds * 1000)
+//        ]);
     }
 }

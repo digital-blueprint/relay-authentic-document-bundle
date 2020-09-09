@@ -9,7 +9,7 @@ use DBP\API\CoreBundle\Entity\Person;
 class AuthenticDocumentRequestMessage
 {
     /**
-     * @var Person
+     * @var Person|null
      */
     private $person;
 
@@ -33,7 +33,7 @@ class AuthenticDocumentRequestMessage
      */
     private $retry = 0;
 
-    public function __construct(Person $person, $documentToken, $urlAttribute, \DateTime $estimatedResponseDate, int $retry = 0)
+    public function __construct($person, $documentToken, $urlAttribute, \DateTime $estimatedResponseDate, int $retry = 0)
     {
         $this->person = $person;
         $this->documentToken = $documentToken;
@@ -80,5 +80,20 @@ class AuthenticDocumentRequestMessage
     public function getRetry(): int
     {
         return $this->retry;
+    }
+
+    /**
+     * @param int $retry
+     */
+    public function setRetry(int $retry): void
+    {
+        $this->retry = $retry;
+    }
+
+    /**
+     */
+    public function incRetry(): void
+    {
+        $this->retry++;
     }
 }
