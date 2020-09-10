@@ -222,7 +222,6 @@ class AuthenticDocumentApi
             $collection->add($this->authenticDocumentTypeFromJsonItem($key, $jsonData));
         }
 
-        dump($collection);
         return $collection;
     }
 
@@ -247,10 +246,8 @@ class AuthenticDocumentApi
         try {
             // http://docs.guzzlephp.org/en/stable/quickstart.html?highlight=get#making-a-request
             $response = $client->request('GET', $url, $options);
-            $dataArray = $this->decodeResponse($response);
-            dump($dataArray);
 
-            return $dataArray;
+            return $this->decodeResponse($response);
         } catch (RequestException $e) {
             $response = $e->getResponse();
             $body = $response->getBody();
@@ -266,8 +263,15 @@ class AuthenticDocumentApi
 
     public function authenticDocumentTypeFromJsonItem(string $key, array $item) :AuthenticDocumentType {
         $authenticDocumentType = new AuthenticDocumentType();
-        $authenticDocumentType->setIdentifier($key);
-        $authenticDocumentType->setName($item['urlsafe_attribute']);
+
+        // we must not set the $key directly as identifier because not all characters are allowed there
+        $authenticDocumentType->setIdentifier(md5($key));
+
+        $authenticDocumentType->setUrlSafeAttribute($item['urlsafe_attribute']);
+        $authenticDocumentType->setAvailabilityStatus($item['availability_status']);
+        $authenticDocumentType->setDocumentToken($item['document_token']);
+        $authenticDocumentType->setExpireData($item['expires'] !== null ? new \DateTime($item['expires']) : null);
+        $authenticDocumentType->setEstimatedTimeOfArrival($item['eta'] !== null ? new \DateTime($item['eta']) : null);
 
         return $authenticDocumentType;
     }

@@ -21,11 +21,11 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *                 }
  *             },
  *         },
-      },
- *    itemOperations={"get"},
- *    shortName="AuthenticDocumentType",
- *    iri="https://schema.tugraz.at/AuthenticDocumentType",
- *    normalizationContext={"jsonld_embed_context"=true, "groups"={"AuthenticDocumentType:output"}}
+ *     },
+ *     itemOperations={"get"},
+ *     iri="https://schema.tugraz.at/AuthenticDocumentType",
+ *     normalizationContext={"jsonld_embed_context"=true, "groups"={"AuthenticDocumentType:output"}},
+ *     denormalizationContext={"groups"={"AuthenticDocumentRequest:input"}}
  * )
  */
 class AuthenticDocumentType
@@ -41,9 +41,42 @@ class AuthenticDocumentType
      * @ApiProperty(iri="http://schema.org/name")
      * @Groups({"AuthenticDocumentType:output"})
      *
-     * @var string
+     * @var string|null
      */
-    private $name;
+    private $urlSafeAttribute;
+
+    /**
+     * @Groups({"AuthenticDocumentType:output"})
+     *
+     * @var string|null
+     */
+    private $availabilityStatus;
+
+    /**
+     * @Groups({"AuthenticDocumentType:output"})
+     *
+     * @var string|null
+     */
+    private $documentToken;
+
+    /**
+     * @Groups({"AuthenticDocumentType:output"})
+     *
+     * @var \DateTime|null
+     */
+    private $expireData;
+
+    /**
+     * @Groups({"AuthenticDocumentType:output"})
+     *
+     * @var \DateTime|null
+     */
+    private $estimatedTimeOfArrival;
+
+    public function getIdentifier(): ?string
+    {
+        return $this->identifier;
+    }
 
     public function setIdentifier(string $identifier): self
     {
@@ -52,19 +85,90 @@ class AuthenticDocumentType
         return $this;
     }
 
-    public function getIdentifier(): ?string
+    public function getUrlSafeAttribute(): ?string
     {
-        return $this->identifier;
+        return $this->urlSafeAttribute;
     }
 
-    public function getName(): ?string
+    public function setUrlSafeAttribute(?string $urlSafeAttribute): self
     {
-        return $this->name;
+        $this->urlSafeAttribute = $urlSafeAttribute;
+
+        return $this;
     }
 
-    public function setName(string $name): self
+    /**
+     * @return string
+     */
+    public function getAvailabilityStatus(): ?string
     {
-        $this->name = $name;
+        return $this->availabilityStatus;
+    }
+
+    /**
+     * @param ?string $availabilityStatus
+     * @return AuthenticDocumentType
+     */
+    public function setAvailabilityStatus(?string $availabilityStatus): self
+    {
+        $this->availabilityStatus = $availabilityStatus;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDocumentToken(): ?string
+    {
+        return $this->documentToken;
+    }
+
+    /**
+     * @param ?string $documentToken
+     * @return AuthenticDocumentType
+     */
+    public function setDocumentToken(?string $documentToken): self
+    {
+        $this->documentToken = $documentToken;
+
+        return $this;
+    }
+
+    /**
+     * @return ?\DateTime
+     */
+    public function getExpireData(): ?\DateTime
+    {
+        return $this->expireData;
+    }
+
+    /**
+     * @param ?\DateTime $expireData
+     * @return AuthenticDocumentType
+     */
+    public function setExpireData(?\DateTime $expireData): self
+    {
+        $this->expireData = $expireData;
+
+        return $this;
+    }
+
+    /**
+     * @return ?\DateTime
+     */
+    public function getEstimatedTimeOfArrival(): ?\DateTime
+    {
+        return $this->estimatedTimeOfArrival;
+    }
+
+    /**
+     * @param ?\DateTime $estimatedTimeOfArrival
+     * @return AuthenticDocumentType
+     */
+    public function setEstimatedTimeOfArrival(?\DateTime $estimatedTimeOfArrival): self
+    {
+        $this->estimatedTimeOfArrival = $estimatedTimeOfArrival;
 
         return $this;
     }
