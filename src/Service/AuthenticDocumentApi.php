@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 /**
- * Egiz Document API service.
+ * Authentic Document API service.
  */
 
 namespace DBP\API\AuthenticDocumentBundle\Service;
 
 use DBP\API\AuthenticDocumentBundle\Entity\AuthenticDocumentRequest;
+use DBP\API\AuthenticDocumentBundle\Entity\AuthenticDocumentType;
 use DBP\API\AuthenticDocumentBundle\Message\AuthenticDocumentRequestMessage;
 use DBP\API\CoreBundle\Exception\ItemNotLoadedException;
 use DBP\API\CoreBundle\Exception\ItemNotStoredException;
@@ -15,6 +16,7 @@ use DBP\API\CoreBundle\Helpers\JsonException;
 use DBP\API\CoreBundle\Helpers\Tools as CoreTools;
 use DBP\API\CoreBundle\Service\GuzzleLogger;
 use DBP\API\CoreBundle\Service\PersonProviderInterface;
+use Doctrine\Common\Collections\ArrayCollection;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
@@ -48,6 +50,7 @@ class AuthenticDocumentApi
 
     /**
      * Replace the guzzle client handler for testing.
+     * @param object|null $handler
      */
     public function setClientHandler(?object $handler)
     {
@@ -70,6 +73,7 @@ class AuthenticDocumentApi
     /**
      * Creates Symfony message and dispatch delayed message to download a document from egiz in the future.
      *
+     * @param AuthenticDocumentRequest $authenticDocumentRequest
      * @throws ItemNotStoredException
      */
     public function createAuthenticDocumentRequestMessage(AuthenticDocumentRequest $authenticDocumentRequest)
@@ -135,6 +139,7 @@ class AuthenticDocumentApi
     }
 
     /**
+     * @param ResponseInterface $response
      * @return mixed
      *
      * @throws ItemNotLoadedException
@@ -152,6 +157,7 @@ class AuthenticDocumentApi
     /**
      * Handle Symfony Message AuthenticDocumentRequestMessage to download the document from the egiz server.
      *
+     * @param AuthenticDocumentRequestMessage $message
      * @throws ItemNotLoadedException
      */
     public function handleRequestMessage(AuthenticDocumentRequestMessage $message)
@@ -198,5 +204,71 @@ class AuthenticDocumentApi
 //        $this->bus->dispatch(new AuthenticDocumentRequestMessage($person, $documentToken, $urlAttribute, $date), [
 //            new DelayStamp($seconds * 1000)
 //        ]);
+    }
+
+    /**
+     * @param array $filters
+     * @return ArrayCollection
+     * @throws ItemNotLoadedException
+     */
+    public function getAuthenticDocumentTypes(array $filters): ArrayCollection
+    {
+        /** @var ArrayCollection<int,AuthenticDocumentType> $collection */
+        $collection = new ArrayCollection();
+
+        $authenticDocumentTypesJsonData = $this->getAuthenticDocumentTypesJsonData($filters);
+
+        foreach ($authenticDocumentTypesJsonData as $key => $jsonData) {
+            $collection->add($this->authenticDocumentTypeFromJsonItem($key, $jsonData));
+        }
+
+        dump($collection);
+        return $collection;
+    }
+
+    public function getAuthenticDocumentTypesJsonData($filters): array {
+        $token = $filters['token'] ?? '';
+
+        if ($token === '') {
+            return [];
+        }
+
+        // TODO: Do we need a setting for this url?
+        $url = "https://eid.egiz.gv.at/documentHandler/documents/document/";
+
+        $client = $this->getClient();
+
+        $options = [
+            'headers' => [
+                'Authorization' => 'Bearer '.$token,
+            ],
+        ];
+
+        try {
+            // http://docs.guzzlephp.org/en/stable/quickstart.html?highlight=get#making-a-request
+            $response = $client->request('GET', $url, $options);
+            $dataArray = $this->decodeResponse($response);
+            dump($dataArray);
+
+            return $dataArray;
+        } catch (RequestException $e) {
+            $response = $e->getResponse();
+            $body = $response->getBody();
+            $message = $body->getContents();
+
+            throw new ItemNotLoadedException(sprintf('Document Types could not be loaded! Message: %s', $message));
+        } catch (GuzzleException $e) {
+            throw new ItemNotLoadedException(sprintf('Document Types could not be loaded! Message: %s', $e->getMessage()));
+        } catch (ItemNotLoadedException $e) {
+            throw new ItemNotLoadedException(sprintf('Document Types could not be loaded! Message: %s', $e->getMessage()));
+        }
+    }
+
+    public function authenticDocumentTypeFromJsonItem(string $key, array $item) :AuthenticDocumentType {
+        $authenticDocumentType = new AuthenticDocumentType();
+        $authenticDocumentType->setIdentifier($key);
+        $authenticDocumentType->setName($item['urlsafe_attribute']);
+
+        return $authenticDocumentType;
     }
 }
