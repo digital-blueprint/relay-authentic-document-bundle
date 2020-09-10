@@ -9,6 +9,7 @@ use ApiPlatform\Core\DataProvider\RestrictedDataProviderInterface;
 use DBP\API\AuthenticDocumentBundle\Entity\AuthenticDocumentType;
 use DBP\API\AuthenticDocumentBundle\Service\AuthenticDocumentApi;
 use DBP\API\CoreBundle\Helpers\ArrayFullPaginator;
+use Symfony\Component\HttpFoundation\Request;
 
 final class AuthenticDocumentTypeCollectionDataProvider implements CollectionDataProviderInterface, RestrictedDataProviderInterface
 {
@@ -32,8 +33,14 @@ final class AuthenticDocumentTypeCollectionDataProvider implements CollectionDat
     public function getCollection(string $resourceClass, string $operationName = null, array $context = []): ArrayFullPaginator
     {
         $api = $this->api;
-
         $filters = $context['filters'] ?? [];
+
+        // get the token as header variable if not set
+        if (!isset($filters['token'])) {
+            $request = Request::createFromGlobals();
+            $filters['token'] = $request->headers->get('token');
+        }
+
         $authenticDocumentTypes = $api->getAuthenticDocumentTypes($filters);
 
         $perPage = self::ITEMS_PER_PAGE;
@@ -46,7 +53,6 @@ final class AuthenticDocumentTypeCollectionDataProvider implements CollectionDat
             $perPage = (int) $context['filters']['perPage'];
         }
 
-        // TODO: do pagination via API
         return new ArrayFullPaginator($authenticDocumentTypes, $page, $perPage);
     }
 }
