@@ -17,7 +17,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *         "get"={
  *             "openapi_context"={
  *                 "parameters"={
- *                    {"name"="id", "in"="path", "description"="Id of document to fetch", "required"="true", "type"="string", "example"="photo-jpeg-requested"},
+ *                    {"name"="id", "in"="path", "description"="Id of document to fetch", "required"="true", "type"="string", "example"="cGhvdG8tanBlZy1yZXF1ZXN0ZWQ%3D"},
  *                    {"name"="token", "in"="header", "description"="Token", "type"="string", "example"="photo-jpeg-available-token", "required"="true"}
  *                 }
  *             }
@@ -59,7 +59,7 @@ class AuthenticDocument
      *
      * @var int
      */
-    private $contentSize;
+    private $contentSize = 0;
 
     public function setIdentifier(string $identifier): self
     {

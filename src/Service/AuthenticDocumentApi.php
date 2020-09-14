@@ -306,10 +306,9 @@ class AuthenticDocumentApi
             throw new NotFoundHttpException("No id was set");
         }
 
-        $documentTypes = $this->getAuthenticDocumentTypes($filters);
-        foreach ($documentTypes as $documentType) {
-            dump($documentType);
-        }
+        $documentType = $this->getAuthenticDocumentType($id, $filters);
+
+        dump($documentType);
 
         return [];
     }

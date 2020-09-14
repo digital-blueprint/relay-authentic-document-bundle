@@ -42,7 +42,9 @@ final class AuthenticDocumentItemDataProvider implements ItemDataProviderInterfa
 
         $data = $api->getAuthenticDocumentJsonData($id, $filters);
 
-        return new AuthenticDocument();
+        $document = new AuthenticDocument();
+        $document->setIdentifier("test");
+        return $document;
 //        return $api->authenticDocumentFromJsonItem($data);
     }
 }
