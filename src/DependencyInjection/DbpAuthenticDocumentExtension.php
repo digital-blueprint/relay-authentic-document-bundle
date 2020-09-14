@@ -16,7 +16,6 @@ class DbpAuthenticDocumentExtension extends Extension
         $pathsToHide = [
             '/authentic_document_requests',
             '/authentic_document_requests/{id}',
-            '/authentic_document_types/{id}',
         ];
 
         $this->extendArrayParameter($container, 'dbp_api.paths_to_hide', $pathsToHide);

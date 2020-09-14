@@ -22,6 +22,7 @@ use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\HandlerStack;
 use Psr\Http\Message\ResponseInterface;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
 
@@ -208,7 +209,7 @@ class AuthenticDocumentApi
 
     /**
      * @param array $filters
-     * @return ArrayCollection
+     * @return ArrayCollection|AuthenticDocumentType[]
      * @throws ItemNotLoadedException
      */
     public function getAuthenticDocumentTypes(array $filters): ArrayCollection
@@ -223,6 +224,28 @@ class AuthenticDocumentApi
         }
 
         return $collection;
+    }
+
+    /**
+     * @param $id
+     * @param array $filters
+     * @return AuthenticDocumentType
+     */
+    public function getAuthenticDocumentType($id, array $filters): AuthenticDocumentType
+    {
+        try {
+            $authenticDocumentTypes = $this->getAuthenticDocumentTypes($filters);
+        } catch (ItemNotLoadedException $e) {
+            throw new NotFoundHttpException("AuthenticDocumentType was not found!");
+        }
+
+        foreach($authenticDocumentTypes as $authenticDocumentType) {
+            if ($authenticDocumentType->getIdentifier() == $id) {
+                return $authenticDocumentType;
+            }
+        }
+
+        throw new NotFoundHttpException("AuthenticDocumentType was not found!");
     }
 
     public function getAuthenticDocumentTypesJsonData($filters): array {
@@ -264,8 +287,10 @@ class AuthenticDocumentApi
     public function authenticDocumentTypeFromJsonItem(string $key, array $item) :AuthenticDocumentType {
         $authenticDocumentType = new AuthenticDocumentType();
 
-        // we must not set the $key directly as identifier because not all characters are allowed there
-        $authenticDocumentType->setIdentifier(md5($key));
+        // we must not set the urlsafe_attribute directly as identifier because not all characters are allowed there
+        // "." is not allowed by ApiPlatform
+        // "/" is not allowed by Symfony
+        $authenticDocumentType->setIdentifier(urlencode(base64_encode($item['urlsafe_attribute'])));
 
         $authenticDocumentType->setUrlSafeAttribute($item['urlsafe_attribute']);
         $authenticDocumentType->setAvailabilityStatus($item['availability_status']);
@@ -274,5 +299,18 @@ class AuthenticDocumentApi
         $authenticDocumentType->setEstimatedTimeOfArrival($item['eta'] !== null ? new \DateTime($item['eta']) : null);
 
         return $authenticDocumentType;
+    }
+
+    public function getAuthenticDocumentJsonData($id, $filters): array {
+        if ($id == "") {
+            throw new NotFoundHttpException("No id was set");
+        }
+
+        $documentTypes = $this->getAuthenticDocumentTypes($filters);
+        foreach ($documentTypes as $documentType) {
+            dump($documentType);
+        }
+
+        return [];
     }
 }

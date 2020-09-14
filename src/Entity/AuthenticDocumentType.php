@@ -22,7 +22,16 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *             },
  *         },
  *     },
- *     itemOperations={"get"},
+ *     itemOperations={"get"={
+ *             "method"="GET",
+ *             "openapi_context"={
+ *                 "parameters"={
+ *                    {"name"="id", "in"="path", "description"="Id", "type"="string", "example"="cGhvdG8tanBlZy1yZXF1ZXN0ZWQ%3D", "required"="true"},
+ *                    {"name"="token", "in"="header", "description"="Token", "type"="string", "example"="photo-jpeg-available-token", "required"="true"}
+ *                 }
+ *             },
+ *         },
+ *     },
  *     iri="https://schema.tugraz.at/AuthenticDocumentType",
  *     normalizationContext={"jsonld_embed_context"=true, "groups"={"AuthenticDocumentType:output"}},
  *     denormalizationContext={"groups"={"AuthenticDocumentRequest:input"}}
