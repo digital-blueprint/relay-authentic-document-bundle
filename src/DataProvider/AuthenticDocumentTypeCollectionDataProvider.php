@@ -9,7 +9,7 @@ use ApiPlatform\Core\DataProvider\RestrictedDataProviderInterface;
 use DBP\API\AuthenticDocumentBundle\Entity\AuthenticDocumentType;
 use DBP\API\AuthenticDocumentBundle\Service\AuthenticDocumentApi;
 use DBP\API\CoreBundle\Helpers\ArrayFullPaginator;
-use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 final class AuthenticDocumentTypeCollectionDataProvider implements CollectionDataProviderInterface, RestrictedDataProviderInterface
 {
@@ -17,9 +17,12 @@ final class AuthenticDocumentTypeCollectionDataProvider implements CollectionDat
 
     private $api;
 
-    public function __construct(AuthenticDocumentApi $api)
+    private $requestStack;
+
+    public function __construct(AuthenticDocumentApi $api, RequestStack $requestStack)
     {
         $this->api = $api;
+        $this->requestStack = $requestStack;
     }
 
     public function supports(string $resourceClass, string $operationName = null, array $context = []): bool
@@ -37,8 +40,7 @@ final class AuthenticDocumentTypeCollectionDataProvider implements CollectionDat
 
         // get the token as header variable if not set
         if (!isset($filters['token'])) {
-            $request = Request::createFromGlobals();
-            $filters['token'] = $request->headers->get('token');
+            $filters['token'] = $this->requestStack->getCurrentRequest()->headers->get('token');
         }
 
         $authenticDocumentTypes = $api->getAuthenticDocumentTypes($filters);
