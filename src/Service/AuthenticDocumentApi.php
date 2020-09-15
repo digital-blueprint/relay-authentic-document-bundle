@@ -290,8 +290,8 @@ class AuthenticDocumentApi
         // we must not set the urlsafe_attribute directly as identifier because not all characters are allowed there
         // "." is not allowed by ApiPlatform
         // "/" is not allowed by Symfony
-        $authenticDocumentType->setIdentifier(urlencode(base64_encode($item['urlsafe_attribute'])));
-
+//        $authenticDocumentType->setIdentifier(urlencode(base64_encode($item['urlsafe_attribute'])));
+        $authenticDocumentType->setIdentifier(self::getAuthenticDocumentTypeKeyMapping($key));
         $authenticDocumentType->setUrlSafeAttribute($item['urlsafe_attribute']);
         $authenticDocumentType->setAvailabilityStatus($item['availability_status']);
         $authenticDocumentType->setDocumentToken($item['document_token']);
@@ -299,5 +299,30 @@ class AuthenticDocumentApi
         $authenticDocumentType->setEstimatedTimeOfArrival($item['eta'] !== null ? new \DateTime($item['eta']) : null);
 
         return $authenticDocumentType;
+    }
+
+    /**
+     * @param null|string $key
+     * @return array|string
+     */
+    public static function getAuthenticDocumentTypeKeyMapping($key = null) {
+        $mapping = [
+            'urn:eidgvat:attributes.user.photo-jpeg-requested' => 'dummy-photo-jpeg-requested',
+            'urn:eidgvat:attributes.user.photo-jpeg-available' => 'dummy-photo-jpeg-available',
+            'urn:eidgvat:attributes.user.photo-png-available' => 'dummy-photo-png-available',
+            'urn:eidgvat:attributes.user.photo-jpeg-not-available' => 'dummy-photo-jpeg-not-available',
+        ];
+
+        return ($key === null) ? $mapping : ($mapping[$key] ?? "");
+    }
+
+    /**
+     * @param null|string $id
+     * @return array|string
+     */
+    public static function getAuthenticDocumentTypeIdMapping($id = null) {
+        $mapping = array_flip(self::getAuthenticDocumentTypeKeyMapping());
+
+        return ($id === null) ? $mapping : ($mapping[$id] ?? "");
     }
 }
