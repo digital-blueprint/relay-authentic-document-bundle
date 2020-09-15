@@ -300,16 +300,4 @@ class AuthenticDocumentApi
 
         return $authenticDocumentType;
     }
-
-    public function getAuthenticDocumentJsonData($id, $filters): array {
-        if ($id == "") {
-            throw new NotFoundHttpException("No id was set");
-        }
-
-        $documentType = $this->getAuthenticDocumentType($id, $filters);
-
-        dump($documentType);
-
-        return [];
-    }
 }

@@ -16,10 +16,6 @@ services:
     tags: [{ name: 'api_platform.item_data_provider'}]
     autowire: true
 
-  DBP\API\AuthenticDocumentBundle\DataProvider\AuthenticDocumentItemDataProvider:
-    tags: [{ name: 'api_platform.item_data_provider'}]
-    autowire: true
-
   DBP\API\AuthenticDocumentBundle\MessageHandler\AuthenticDocumentRequestHandler:
     public: false
     autowire: true
