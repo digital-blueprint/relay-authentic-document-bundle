@@ -62,8 +62,6 @@ class AuthenticDocumentType
     private $availabilityStatus;
 
     /**
-     * @Groups({"AuthenticDocumentType:output"})
-     *
      * @var string|null
      */
     private $documentToken;

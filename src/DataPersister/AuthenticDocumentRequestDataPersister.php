@@ -7,6 +7,7 @@ namespace DBP\API\AuthenticDocumentBundle\DataPersister;
 use ApiPlatform\Core\DataPersister\DataPersisterInterface;
 use DBP\API\AuthenticDocumentBundle\Entity\AuthenticDocumentRequest;
 use DBP\API\AuthenticDocumentBundle\Service\AuthenticDocumentApi;
+use DBP\API\CoreBundle\Exception\ItemNotStoredException;
 
 final class AuthenticDocumentRequestDataPersister implements DataPersisterInterface
 {
@@ -31,12 +32,18 @@ final class AuthenticDocumentRequestDataPersister implements DataPersisterInterf
      */
     public function persist($authenticImageRequest)
     {
+        $typeId = $authenticImageRequest->getTypeId();
+
+        if ($authenticImageRequest->getToken() == "" || $typeId == "") {
+            throw new ItemNotStoredException("Token and typeId are mandatory!");
+        }
+
         $api = $this->api;
-        $api->createAuthenticDocumentRequestMessage($authenticImageRequest);
-        $type = $authenticImageRequest->getType() ?? 'generic';
+        $authenticDocumentType = $api->createAuthenticDocumentRequestMessage($authenticImageRequest);
 
         // TODO: Is there a better identifier (not that we would need one)
-        $authenticImageRequest->setIdentifier($type.'-'.time());
+        $authenticImageRequest->setIdentifier($typeId.'-'.time());
+        $authenticImageRequest->setEstimatedTimeOfArrival($authenticDocumentType->getEstimatedTimeOfArrival());
 
         return $authenticImageRequest;
     }

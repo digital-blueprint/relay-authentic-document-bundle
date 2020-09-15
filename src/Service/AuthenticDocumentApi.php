@@ -11,7 +11,6 @@ use DBP\API\AuthenticDocumentBundle\Entity\AuthenticDocumentRequest;
 use DBP\API\AuthenticDocumentBundle\Entity\AuthenticDocumentType;
 use DBP\API\AuthenticDocumentBundle\Message\AuthenticDocumentRequestMessage;
 use DBP\API\CoreBundle\Exception\ItemNotLoadedException;
-use DBP\API\CoreBundle\Exception\ItemNotStoredException;
 use DBP\API\CoreBundle\Helpers\JsonException;
 use DBP\API\CoreBundle\Helpers\Tools as CoreTools;
 use DBP\API\CoreBundle\Service\GuzzleLogger;
@@ -75,68 +74,30 @@ class AuthenticDocumentApi
      * Creates Symfony message and dispatch delayed message to download a document from egiz in the future.
      *
      * @param AuthenticDocumentRequest $authenticDocumentRequest
-     * @throws ItemNotStoredException
+     * @return AuthenticDocumentType
      */
     public function createAuthenticDocumentRequestMessage(AuthenticDocumentRequest $authenticDocumentRequest)
     {
         $token = $authenticDocumentRequest->getToken();
-        // TODO: Do we need a setting for this url?
-        $url = 'https://eid.egiz.gv.at/documentHandler/documents/document';
+        $typeId = $authenticDocumentRequest->getTypeId();
+        $authenticDocumentType = $this->getAuthenticDocumentType($typeId, ["token" => $token]);
+        $etaData = $authenticDocumentType->getEstimatedTimeOfArrival();
+        $documentToken = $authenticDocumentType->getDocumentToken();
+        $urlAttribute = $authenticDocumentType->getUrlSafeAttribute();
 
-        $client = $this->getClient();
-        $options = [
-            'headers' => [
-                'Authorization' => 'Bearer '.$token,
-            ],
-        ];
-
-        try {
-            // http://docs.guzzlephp.org/en/stable/quickstart.html?highlight=get#making-a-request
-            $response = $client->request('GET', $url, $options);
-            $data = $this->decodeResponse($response);
-            dump($data);
-            // TODO: Do we always use photo-jpeg-requested?
-//            $documentRequestData = $data["urn:eidgvat:attributes.user.photo-jpeg-requested"];
-            $documentRequestData = $data['urn:eidgvat:attributes.user.photo-jpeg-available'];
-
-            $eta = $documentRequestData['eta'];
-            $date = new \DateTime($eta === null ? 'now' : $eta);
-            $documentToken = $documentRequestData['document_token'];
-            $urlAttribute = $documentRequestData['urlsafe_attribute'];
-
-            $seconds = $date->getTimestamp() - time();
-            if ($seconds < 0) {
-                $seconds = 0;
-            }
-
-            // TODO: Remove 1-sec-override to get the real delay
-            $seconds = 1;
-
-            // we currently doen't use a person
-//            $person = $this->personProvider->getCurrentPerson();
-            $person = null;
-            $this->bus->dispatch(new AuthenticDocumentRequestMessage($person, $documentToken, $urlAttribute, $date), [
-                new DelayStamp($seconds * 1000),
-            ]);
-        } catch (RequestException $e) {
-            $headers = $e->getResponse()->getHeader('WWW-Authenticate');
-
-            if (count($headers) > 0) {
-                $message = $headers[0];
-
-                if (preg_match('/error_description="(.+?)"/', $message, $matches)) {
-                    $message = $matches[1];
-                }
-            } else {
-                $message = $e->getMessage();
-            }
-
-            throw new ItemNotStoredException(sprintf('AuthenticDocumentRequest could not be stored! Message: %s', $message));
-        } catch (ItemNotLoadedException $e) {
-            throw new ItemNotStoredException(sprintf('AuthenticDocumentRequest could not be stored! Message: %s', $e->getMessage()));
-        } catch (GuzzleException $e) {
-            throw new ItemNotStoredException(sprintf('AuthenticDocumentRequest could not be stored! Message: %s', $e->getMessage()));
+        $seconds = $etaData->getTimestamp() - time();
+        if ($seconds < 0) {
+            $seconds = 0;
         }
+
+        // TODO: we currently doesn't use a person
+//        $person = $this->personProvider->getCurrentPerson();
+        $person = null;
+        $this->bus->dispatch(new AuthenticDocumentRequestMessage($person, $documentToken, $urlAttribute, $etaData), [
+            new DelayStamp($seconds * 1000),
+        ]);
+
+        return $authenticDocumentType;
     }
 
     /**

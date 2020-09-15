@@ -18,7 +18,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *             "status"=202,
  *             "openapi_context"={
  *                 "parameters"={
- *                    {"name"="body", "in"="body", "description"="Token", "type"="string", "example"={"token"="photo-jpeg-available-token", "type"="image"}, "required"="true"}
+ *                    {"name"="body", "in"="body", "description"="Token", "type"="string", "example"={"token"="photo-jpeg-available-token", "typeId"="dummy-photo-jpeg-requested"}, "required"="true"}
  *                 }
  *             },
  *         },
@@ -59,7 +59,14 @@ class AuthenticDocumentRequest
      *
      * @var string
      */
-    private $type;
+    private $typeId;
+
+    /**
+     * @Groups({"AuthenticDocumentRequest:output"})
+     *
+     * @var \DateTime|null
+     */
+    private $estimatedTimeOfArrival;
 
     public function setIdentifier(string $identifier): self
     {
@@ -85,14 +92,33 @@ class AuthenticDocumentRequest
         return $this;
     }
 
-    public function getType(): ?string
+    public function getTypeId(): ?string
     {
-        return $this->type;
+        return $this->typeId;
     }
 
-    public function setType(string $type): self
+    public function setTypeId(string $typeId): self
     {
-        $this->type = $type;
+        $this->typeId = $typeId;
+
+        return $this;
+    }
+
+    /**
+     * @return ?\DateTime
+     */
+    public function getEstimatedTimeOfArrival(): ?\DateTime
+    {
+        return $this->estimatedTimeOfArrival;
+    }
+
+    /**
+     * @param ?\DateTime $estimatedTimeOfArrival
+     * @return AuthenticDocumentRequest
+     */
+    public function setEstimatedTimeOfArrival(?\DateTime $estimatedTimeOfArrival): self
+    {
+        $this->estimatedTimeOfArrival = $estimatedTimeOfArrival;
 
         return $this;
     }
