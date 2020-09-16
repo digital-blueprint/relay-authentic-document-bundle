@@ -74,30 +74,39 @@ class AuthenticDocumentApi
      * Creates Symfony message and dispatch delayed message to download a document from egiz in the future.
      *
      * @param AuthenticDocumentRequest $authenticDocumentRequest
-     * @return AuthenticDocumentType
+     * @return AuthenticDocumentRequestMessage
      */
-    public function createAuthenticDocumentRequestMessage(AuthenticDocumentRequest $authenticDocumentRequest)
+    public function createAndDispatchAuthenticDocumentRequestMessage(AuthenticDocumentRequest $authenticDocumentRequest)
     {
         $token = $authenticDocumentRequest->getToken();
         $typeId = $authenticDocumentRequest->getTypeId();
         $authenticDocumentType = $this->getAuthenticDocumentType($typeId, ["token" => $token]);
-        $etaData = $authenticDocumentType->getEstimatedTimeOfArrival();
+        $availabilityStatus = $authenticDocumentType->getAvailabilityStatus();
+
+        if ($availabilityStatus == "not_available") {
+            throw new NotFoundHttpException("Document is not available");
+        }
+
+        $estimatedTimeOfArrival = $authenticDocumentType->getEstimatedTimeOfArrival();
         $documentToken = $authenticDocumentType->getDocumentToken();
         $urlAttribute = $authenticDocumentType->getUrlSafeAttribute();
+        $seconds = $estimatedTimeOfArrival->getTimestamp() - time();
 
-        $seconds = $etaData->getTimestamp() - time();
         if ($seconds < 0) {
             $seconds = 0;
         }
 
-        // TODO: we currently doesn't use a person
+        // TODO: we currently don't use a person
 //        $person = $this->personProvider->getCurrentPerson();
         $person = null;
-        $this->bus->dispatch(new AuthenticDocumentRequestMessage($person, $documentToken, $urlAttribute, $etaData), [
+        $message = new AuthenticDocumentRequestMessage($person, $documentToken, $urlAttribute, $estimatedTimeOfArrival);
+
+        $this->bus->dispatch(
+            $message, [
             new DelayStamp($seconds * 1000),
         ]);
 
-        return $authenticDocumentType;
+        return $message;
     }
 
     /**
@@ -247,6 +256,11 @@ class AuthenticDocumentApi
 
     public function authenticDocumentTypeFromJsonItem(string $key, array $item) :AuthenticDocumentType {
         $authenticDocumentType = new AuthenticDocumentType();
+        $availabilityStatus = $item['availability_status'];
+        $estimatedTimeOfArrival = $item['eta'] !== null ? new \DateTime($item['eta']) : null;
+        if ($availabilityStatus == "available") {
+            $estimatedTimeOfArrival = new \DateTime();
+        }
 
         // we must not set the urlsafe_attribute directly as identifier because not all characters are allowed there
         // "." is not allowed by ApiPlatform
@@ -254,10 +268,10 @@ class AuthenticDocumentApi
 //        $authenticDocumentType->setIdentifier(urlencode(base64_encode($item['urlsafe_attribute'])));
         $authenticDocumentType->setIdentifier(self::getAuthenticDocumentTypeKeyMapping($key));
         $authenticDocumentType->setUrlSafeAttribute($item['urlsafe_attribute']);
-        $authenticDocumentType->setAvailabilityStatus($item['availability_status']);
+        $authenticDocumentType->setAvailabilityStatus($availabilityStatus);
         $authenticDocumentType->setDocumentToken($item['document_token']);
-        $authenticDocumentType->setExpireData($item['expires'] !== null ? new \DateTime($item['expires']) : null);
-        $authenticDocumentType->setEstimatedTimeOfArrival($item['eta'] !== null ? new \DateTime($item['eta']) : null);
+        $authenticDocumentType->setExpiryDate($item['expires'] !== null ? new \DateTime($item['expires']) : null);
+        $authenticDocumentType->setEstimatedTimeOfArrival($estimatedTimeOfArrival);
 
         return $authenticDocumentType;
     }

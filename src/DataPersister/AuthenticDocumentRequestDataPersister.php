@@ -39,11 +39,11 @@ final class AuthenticDocumentRequestDataPersister implements DataPersisterInterf
         }
 
         $api = $this->api;
-        $authenticDocumentType = $api->createAuthenticDocumentRequestMessage($authenticImageRequest);
+        $message = $api->createAndDispatchAuthenticDocumentRequestMessage($authenticImageRequest);
 
-        // TODO: Is there a better identifier (not that we would need one)
+        // TODO: Is there a better identifier? (not that we would need one)
         $authenticImageRequest->setIdentifier($typeId.'-'.time());
-        $authenticImageRequest->setEstimatedTimeOfArrival($authenticDocumentType->getEstimatedTimeOfArrival());
+        $authenticImageRequest->setEstimatedTimeOfArrival($message->getEstimatedResponseDate());
 
         return $authenticImageRequest;
     }

@@ -71,7 +71,7 @@ class AuthenticDocumentType
      *
      * @var \DateTime|null
      */
-    private $expireData;
+    private $expiryDate;
 
     /**
      * @Groups({"AuthenticDocumentType:output"})
@@ -145,18 +145,18 @@ class AuthenticDocumentType
     /**
      * @return ?\DateTime
      */
-    public function getExpireData(): ?\DateTime
+    public function getExpiryDate(): ?\DateTime
     {
-        return $this->expireData;
+        return $this->expiryDate;
     }
 
     /**
-     * @param ?\DateTime $expireData
+     * @param ?\DateTime $expiryDate
      * @return AuthenticDocumentType
      */
-    public function setExpireData(?\DateTime $expireData): self
+    public function setExpiryDate(?\DateTime $expiryDate): self
     {
-        $this->expireData = $expireData;
+        $this->expiryDate = $expiryDate;
 
         return $this;
     }
