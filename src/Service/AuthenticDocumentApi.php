@@ -269,7 +269,8 @@ class AuthenticDocumentApi
         // "." is not allowed by ApiPlatform
         // "/" is not allowed by Symfony
 //        $authenticDocumentType->setIdentifier(urlencode(base64_encode($item['urlsafe_attribute'])));
-        $authenticDocumentType->setIdentifier(self::getAuthenticDocumentTypeKeyMapping($key));
+        $authenticDocumentType->setIdentifier(self::getAuthenticDocumentTypeKeyIdentifierMapping($key));
+        $authenticDocumentType->setName(self::getAuthenticDocumentTypeKeyNameMapping($key));
         $authenticDocumentType->setUrlSafeAttribute($item['urlsafe_attribute']);
         $authenticDocumentType->setAvailabilityStatus($availabilityStatus);
         $authenticDocumentType->setDocumentToken($item['document_token']);
@@ -283,7 +284,22 @@ class AuthenticDocumentApi
      * @param null|string $key
      * @return array|string
      */
-    public static function getAuthenticDocumentTypeKeyMapping($key = null) {
+    public static function getAuthenticDocumentTypeKeyNameMapping($key = null) {
+        $mapping = [
+            'urn:eidgvat:attributes.user.photo-jpeg-requested' => 'Foto',
+            'urn:eidgvat:attributes.user.photo-jpeg-available' => 'Dokument 1',
+            'urn:eidgvat:attributes.user.photo-png-available' => 'Dokument 2',
+            'urn:eidgvat:attributes.user.photo-jpeg-not-available' => 'Dokument 3',
+        ];
+
+        return ($key === null) ? $mapping : ($mapping[$key] ?? "");
+    }
+
+    /**
+     * @param null|string $key
+     * @return array|string
+     */
+    public static function getAuthenticDocumentTypeKeyIdentifierMapping($key = null) {
         $mapping = [
             'urn:eidgvat:attributes.user.photo-jpeg-requested' => 'dummy-photo-jpeg-requested',
             'urn:eidgvat:attributes.user.photo-jpeg-available' => 'dummy-photo-jpeg-available',
@@ -298,8 +314,8 @@ class AuthenticDocumentApi
      * @param null|string $id
      * @return array|string
      */
-    public static function getAuthenticDocumentTypeIdMapping($id = null) {
-        $mapping = array_flip(self::getAuthenticDocumentTypeKeyMapping());
+    public static function getAuthenticDocumentTypeIdentifierKeyMapping($id = null) {
+        $mapping = array_flip(self::getAuthenticDocumentTypeKeyIdentifierMapping());
 
         return ($id === null) ? $mapping : ($mapping[$id] ?? "");
     }

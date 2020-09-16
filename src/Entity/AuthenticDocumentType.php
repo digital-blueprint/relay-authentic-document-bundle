@@ -50,6 +50,14 @@ class AuthenticDocumentType
      * @ApiProperty(iri="http://schema.org/name")
      * @Groups({"AuthenticDocumentType:output"})
      *
+     * @var string
+     */
+    private $name;
+
+    /**
+     * @ApiProperty(iri="http://schema.org/name")
+     * @Groups({"AuthenticDocumentType:output"})
+     *
      * @var string|null
      */
     private $urlSafeAttribute;
@@ -88,6 +96,25 @@ class AuthenticDocumentType
     public function setIdentifier(string $identifier): self
     {
         $this->identifier = $identifier;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName(): ?string
+    {
+        return $this->name;
+    }
+
+    /**
+     * @param ?string $name
+     * @return AuthenticDocumentType
+     */
+    public function setName(?string $name): self
+    {
+        $this->name = $name;
 
         return $this;
     }
