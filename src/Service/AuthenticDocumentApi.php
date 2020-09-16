@@ -89,7 +89,6 @@ class AuthenticDocumentApi
 
         $estimatedTimeOfArrival = $authenticDocumentType->getEstimatedTimeOfArrival();
         $documentToken = $authenticDocumentType->getDocumentToken();
-        $urlAttribute = $authenticDocumentType->getUrlSafeAttribute();
         $seconds = $estimatedTimeOfArrival->getTimestamp() - time();
 
         if ($seconds < 0) {
@@ -99,7 +98,7 @@ class AuthenticDocumentApi
         // TODO: we currently don't use a person
 //        $person = $this->personProvider->getCurrentPerson();
         $person = null;
-        $message = new AuthenticDocumentRequestMessage($person, $documentToken, $urlAttribute, $estimatedTimeOfArrival);
+        $message = new AuthenticDocumentRequestMessage($person, $documentToken, $typeId, $estimatedTimeOfArrival);
 
         $this->bus->dispatch(
             $message, [
@@ -135,9 +134,13 @@ class AuthenticDocumentApi
     {
         // TODO: Check at egiz server if document is already available
         dump($message);
-
-        $urlAttribute = $message->getUrlAttribute();
         $documentToken = $message->getDocumentToken();
+        $typeId = $message->getTypeId();
+        $authenticDocumentType = $this->getAuthenticDocumentType($typeId, ["token" => $documentToken]);
+
+        dump($authenticDocumentType);
+
+        $urlAttribute = $authenticDocumentType->getUrlSafeAttribute();
 
         // TODO: Do we need a setting for this url?
         $url = "https://eid.egiz.gv.at/documentHandler/documents/document/$urlAttribute";

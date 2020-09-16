@@ -21,7 +21,7 @@ class AuthenticDocumentRequestMessage
     /**
      * @var string
      */
-    private $urlAttribute;
+    private $typeId;
 
     /**
      * @var \DateTime
@@ -33,11 +33,11 @@ class AuthenticDocumentRequestMessage
      */
     private $retry = 0;
 
-    public function __construct($person, $documentToken, $urlAttribute, \DateTime $estimatedResponseDate, int $retry = 0)
+    public function __construct($person, $documentToken, $typeId, \DateTime $estimatedResponseDate, int $retry = 0)
     {
         $this->person = $person;
         $this->documentToken = $documentToken;
-        $this->urlAttribute = $urlAttribute;
+        $this->typeId = $typeId;
         $this->estimatedResponseDate = $estimatedResponseDate;
         $this->retry = $retry;
     }
@@ -52,9 +52,9 @@ class AuthenticDocumentRequestMessage
         return $this->documentToken;
     }
 
-    public function getUrlAttribute(): string
+    public function getTypeId(): string
     {
-        return $this->urlAttribute;
+        return $this->typeId;
     }
 
     public function getEstimatedResponseDate(): \DateTime
