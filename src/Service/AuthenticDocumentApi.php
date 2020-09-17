@@ -319,4 +319,16 @@ class AuthenticDocumentApi
 
         return ($id === null) ? $mapping : ($mapping[$id] ?? "");
     }
+
+    public function getAuthenticDocumentJsonData($id, $filters): array {
+        if ($id == "") {
+            throw new NotFoundHttpException("No id was set");
+        }
+
+        $documentType = $this->getAuthenticDocumentType($id, $filters);
+
+        dump($documentType);
+
+        return [];
+    }
 }
