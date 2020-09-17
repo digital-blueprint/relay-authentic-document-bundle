@@ -165,7 +165,7 @@ class AuthenticDocumentApi
 
                 break;
             case "requested":
-                // TODO: If document is not available dispatch a new delayed message
+                // TODO: If document is not yet available dispatch a new delayed message
                 $newMessage = clone $message;
                 $newMessage->incRetry();
 
@@ -174,6 +174,7 @@ class AuthenticDocumentApi
 //        ]);
                 break;
             default:
+                // TODO: Handle "document not available"
 //                throw new NotFoundHttpException("AuthenticDocument was not found!");
                 break;
         }
