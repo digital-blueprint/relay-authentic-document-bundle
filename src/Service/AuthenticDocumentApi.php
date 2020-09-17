@@ -134,52 +134,49 @@ class AuthenticDocumentApi
      */
     public function handleRequestMessage(AuthenticDocumentRequestMessage $message)
     {
-        // TODO: Check at egiz server if document is already available
-        dump($message);
         $documentToken = $message->getDocumentToken();
         $typeId = $message->getTypeId();
-        $authenticDocumentType = $this->getAuthenticDocumentType($typeId, ["token" => $documentToken]);
+        $filters = ["token" => $documentToken];
+        // check if document is already available
+        $authenticDocumentType = $this->getAuthenticDocumentType($typeId, $filters);
 
-        dump($authenticDocumentType);
+        switch ($authenticDocumentType->getAvailabilityStatus()) {
+            case "available":
+                try {
+                    $data = $this->getAuthenticDocumentData($typeId, $filters);
 
-        $urlAttribute = $authenticDocumentType->getUrlSafeAttribute();
+                    // store document locally for testing
+                    $path = 'documents';
 
-        // TODO: Do we need a setting for this url?
-        $url = "https://eid.egiz.gv.at/documentHandler/documents/document/$urlAttribute";
+                    // the worker is run in the root path, the webserver is run in /public
+                    if (!Tools::endsWith(getcwd(), "/public")) {
+                        $path = "public/" . $path;
+                    }
 
-        $client = $this->getClient();
-        $options = [
-            'headers' => [
-                'Authorization' => 'Bearer '.$documentToken,
-            ],
-        ];
+                    if (!is_dir($path)) {
+                        mkdir($path);
+                    }
 
-        try {
-            // http://docs.guzzlephp.org/en/stable/quickstart.html?highlight=get#making-a-request
-            $response = $client->request('GET', $url, $options);
-            $data = $response->getBody()->getContents();
-            // TODO: Store document
-            dump('Bytes received: '.strlen($data));
-            // TODO: Notify user
-        } catch (RequestException $e) {
-            $response = $e->getResponse();
-            $body = $response->getBody();
-            $message = $body->getContents();
+                    $mimeType = Tools::getMimeType($data);
+                    $fileExtension = Tools::getFileExtensionForMimeType($mimeType);
+                    file_put_contents($path . "/" . $typeId . "." . $fileExtension, $data);
+                } catch (ItemNotLoadedException $e) {
+                }
 
-            throw new ItemNotLoadedException(sprintf('Document could not be loaded! Message: %s', $message));
-        } catch (ItemNotLoadedException $e) {
-            throw new ItemNotLoadedException(sprintf('Document could not be loaded! Message: %s', $e->getMessage()));
-        } catch (GuzzleException $e) {
-            throw new ItemNotLoadedException(sprintf('Document could not be loaded! Message: %s', $e->getMessage()));
-        }
-
-        // TODO: If document is not available dispatch a new delayed message
-        $newMessage = clone $message;
-        $newMessage->incRetry();
+                break;
+            case "requested":
+                // TODO: If document is not available dispatch a new delayed message
+                $newMessage = clone $message;
+                $newMessage->incRetry();
 
 //        $this->bus->dispatch(new AuthenticDocumentRequestMessage($person, $documentToken, $urlAttribute, $date), [
 //            new DelayStamp($seconds * 1000)
 //        ]);
+                break;
+            default:
+//                throw new NotFoundHttpException("AuthenticDocument was not found!");
+                break;
+        }
     }
 
     /**
