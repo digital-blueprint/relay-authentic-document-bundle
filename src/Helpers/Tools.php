@@ -24,7 +24,7 @@ class Tools
     public static function getFileExtensionForMimeType(string $mimeType): string {
         $extensions = array(
             'application/pdf' => 'pdf',
-            'image/jpeg' => 'jpeg',
+            'image/jpeg' => 'jpg',
             'image/png' => 'png',
             'text/xml' => 'xml'
         );
