@@ -27,8 +27,10 @@ final class AuthenticDocumentItemDataProvider implements ItemDataProviderInterfa
     {
         return AuthenticDocument::class === $resourceClass;
     }
+
     /**
      * @param array|int|string $id
+     * @throws \DBP\API\CoreBundle\Exception\ItemNotLoadedException
      */
     public function getItem(string $resourceClass, $id, string $operationName = null, array $context = []): ?AuthenticDocument
     {
@@ -40,11 +42,6 @@ final class AuthenticDocumentItemDataProvider implements ItemDataProviderInterfa
             $filters['token'] = $this->requestStack->getCurrentRequest()->headers->get('token');
         }
 
-        $data = $api->getAuthenticDocumentJsonData($id, $filters);
-
-        $document = new AuthenticDocument();
-        $document->setIdentifier("test");
-        return $document;
-//        return $api->authenticDocumentFromJsonItem($data);
+        return $api->getAuthenticDocument($id, $filters);
     }
 }

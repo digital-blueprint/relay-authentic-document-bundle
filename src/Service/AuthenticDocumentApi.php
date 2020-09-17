@@ -7,8 +7,10 @@ declare(strict_types=1);
 
 namespace DBP\API\AuthenticDocumentBundle\Service;
 
+use DBP\API\AuthenticDocumentBundle\Entity\AuthenticDocument;
 use DBP\API\AuthenticDocumentBundle\Entity\AuthenticDocumentRequest;
 use DBP\API\AuthenticDocumentBundle\Entity\AuthenticDocumentType;
+use DBP\API\AuthenticDocumentBundle\Helpers\Tools;
 use DBP\API\AuthenticDocumentBundle\Message\AuthenticDocumentRequestMessage;
 use DBP\API\CoreBundle\Exception\ItemNotLoadedException;
 use DBP\API\CoreBundle\Helpers\JsonException;
@@ -320,15 +322,68 @@ class AuthenticDocumentApi
         return ($id === null) ? $mapping : ($mapping[$id] ?? "");
     }
 
-    public function getAuthenticDocumentJsonData($id, $filters): array {
+    public function getAuthenticDocumentData($id, $filters): string {
         if ($id == "") {
             throw new NotFoundHttpException("No id was set");
         }
 
-        $documentType = $this->getAuthenticDocumentType($id, $filters);
+        $authenticDocumentType = $this->getAuthenticDocumentType($id, $filters);
 
-        dump($documentType);
+        switch ($authenticDocumentType->getAvailabilityStatus()) {
+            case "available":
+                $urlAttribute = $authenticDocumentType->getUrlSafeAttribute();
+                $documentToken = $authenticDocumentType->getDocumentToken();
 
-        return [];
+                // TODO: Do we need a setting for this url?
+                $url = "https://eid.egiz.gv.at/documentHandler/documents/document/$urlAttribute";
+
+                $client = $this->getClient();
+                $options = [
+                    'headers' => [
+                        'Authorization' => 'Bearer '.$documentToken,
+                    ],
+                ];
+
+                try {
+                    // http://docs.guzzlephp.org/en/stable/quickstart.html?highlight=get#making-a-request
+                    $response = $client->request('GET', $url, $options);
+
+                    return $response->getBody()->getContents();
+                } catch (RequestException $e) {
+                    $response = $e->getResponse();
+                    $body = $response->getBody();
+                    $message = $body->getContents();
+
+                    throw new ItemNotLoadedException(sprintf('Document could not be loaded! Message: %s', $message));
+                } catch (ItemNotLoadedException $e) {
+                    throw new ItemNotLoadedException(sprintf('Document could not be loaded! Message: %s', $e->getMessage()));
+                } catch (GuzzleException $e) {
+                    throw new ItemNotLoadedException(sprintf('Document could not be loaded! Message: %s', $e->getMessage()));
+                }
+            case "requested":
+                throw new NotFoundHttpException("AuthenticDocument is not yet available!");
+            default:
+                throw new NotFoundHttpException("AuthenticDocument was not found!");
+        }
+    }
+
+    /**
+     * @param $id
+     * @param $filters
+     * @return AuthenticDocument
+     * @throws ItemNotLoadedException
+     */
+    public function getAuthenticDocument($id, $filters): AuthenticDocument {
+        $data = $this->getAuthenticDocumentData($id, $filters);
+        $mimeType = Tools::getMimeType($data);
+        $fileExtension = Tools::getFileExtensionForMimeType($mimeType);
+
+        $authenticDocument = new AuthenticDocument();
+        $authenticDocument->setIdentifier($id);
+        $authenticDocument->setContentUrl(Tools::getDataURI($data, $mimeType));
+        $authenticDocument->setName("document." . $fileExtension);
+        $authenticDocument->setContentSize(strlen($data));
+
+        return $authenticDocument;
     }
 }
