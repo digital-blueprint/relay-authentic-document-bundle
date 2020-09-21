@@ -16,7 +16,6 @@ use DBP\API\CoreBundle\Exception\ItemNotLoadedException;
 use DBP\API\CoreBundle\Helpers\JsonException;
 use DBP\API\CoreBundle\Helpers\Tools as CoreTools;
 use DBP\API\CoreBundle\Service\GuzzleLogger;
-use DBP\API\CoreBundle\Service\PersonProviderInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
@@ -34,18 +33,12 @@ class AuthenticDocumentApi
      */
     private $bus;
 
-    /**
-     * @var PersonProviderInterface
-     */
-    private $personProvider;
-
     private $clientHandler;
     private $guzzleLogger;
 
-    public function __construct(MessageBusInterface $bus, PersonProviderInterface $personProvider, GuzzleLogger $guzzleLogger)
+    public function __construct(MessageBusInterface $bus, GuzzleLogger $guzzleLogger)
     {
         $this->bus = $bus;
-        $this->personProvider = $personProvider;
         $this->clientHandler = null;
         $this->guzzleLogger = $guzzleLogger;
     }
@@ -97,10 +90,7 @@ class AuthenticDocumentApi
             $seconds = 0;
         }
 
-        // TODO: we currently don't use a person
-//        $person = $this->personProvider->getCurrentPerson();
-        $person = null;
-        $message = new AuthenticDocumentRequestMessage($person, $documentToken, $typeId, $estimatedTimeOfArrival);
+        $message = new AuthenticDocumentRequestMessage($documentToken, $typeId, $estimatedTimeOfArrival);
 
         $this->bus->dispatch(
             $message, [
@@ -169,9 +159,9 @@ class AuthenticDocumentApi
                 $newMessage = clone $message;
                 $newMessage->incRetry();
 
-//        $this->bus->dispatch(new AuthenticDocumentRequestMessage($person, $documentToken, $urlAttribute, $date), [
-//            new DelayStamp($seconds * 1000)
-//        ]);
+//                $this->bus->dispatch(new AuthenticDocumentRequestMessage($documentToken, $urlAttribute, $date), [
+//                    new DelayStamp($seconds * 1000)
+//                ]);
                 break;
             default:
                 // TODO: Handle "document not available"

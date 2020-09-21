@@ -11,7 +11,6 @@ declare(strict_types=1);
 namespace DBP\API\AuthenticDocumentBundle\Command;
 
 use DBP\API\AuthenticDocumentBundle\Message\AuthenticDocumentRequestMessage;
-use DBP\API\CoreBundle\Service\PersonProviderInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -28,15 +27,9 @@ class MessageTestCommand extends Command
      */
     private $bus;
 
-    /**
-     * @var PersonProviderInterface
-     */
-    private $personProvider;
-
-    public function __construct(MessageBusInterface $bus, PersonProviderInterface $personProvider)
+    public function __construct(MessageBusInterface $bus)
     {
         $this->bus = $bus;
-        $this->personProvider = $personProvider;
 
         parent::__construct();
     }
@@ -48,8 +41,6 @@ class MessageTestCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $person = $this->personProvider->getPerson('woody007', true);
-
         // date we would get from egiz
         $date = new \DateTime();
         // add 5 sec for testing
@@ -60,7 +51,7 @@ class MessageTestCommand extends Command
             + $delayInterval->i * 60 + $delayInterval->s;
         dump($seconds);
 
-        $this->bus->dispatch(new AuthenticDocumentRequestMessage($person, $date, '', new \DateTime()), [
+        $this->bus->dispatch(new AuthenticDocumentRequestMessage($date, '', new \DateTime()), [
             // wait 5 seconds before processing
             new DelayStamp($seconds * 1000),
         ]);
