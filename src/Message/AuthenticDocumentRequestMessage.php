@@ -63,4 +63,15 @@ class AuthenticDocumentRequestMessage
     {
         ++$this->retry;
     }
+
+    /**
+     * @param \DateTime $estimatedResponseDate
+     * @return AuthenticDocumentRequestMessage
+     */
+    public function setEstimatedResponseDate(\DateTime $estimatedResponseDate): self
+    {
+        $this->estimatedResponseDate = $estimatedResponseDate;
+
+        return $this;
+    }
 }

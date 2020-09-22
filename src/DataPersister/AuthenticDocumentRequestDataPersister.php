@@ -8,14 +8,18 @@ use ApiPlatform\Core\DataPersister\DataPersisterInterface;
 use DBP\API\AuthenticDocumentBundle\Entity\AuthenticDocumentRequest;
 use DBP\API\AuthenticDocumentBundle\Service\AuthenticDocumentApi;
 use DBP\API\CoreBundle\Exception\ItemNotStoredException;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 final class AuthenticDocumentRequestDataPersister implements DataPersisterInterface
 {
     private $api;
 
-    public function __construct(AuthenticDocumentApi $api)
+    private $requestStack;
+
+    public function __construct(AuthenticDocumentApi $api, RequestStack $requestStack)
     {
         $this->api = $api;
+        $this->requestStack = $requestStack;
     }
 
     public function supports($data): bool
@@ -39,7 +43,8 @@ final class AuthenticDocumentRequestDataPersister implements DataPersisterInterf
         }
 
         $api = $this->api;
-        $message = $api->createAndDispatchAuthenticDocumentRequestMessage($authenticImageRequest);
+        $authorizationHeader = $this->requestStack->getCurrentRequest()->headers->get('Authorization');
+        $message = $api->createAndDispatchAuthenticDocumentRequestMessage($authenticImageRequest, $authorizationHeader);
 
         // TODO: Is there a better identifier? (not that we would need one)
         $authenticImageRequest->setIdentifier($typeId.'-'.time());

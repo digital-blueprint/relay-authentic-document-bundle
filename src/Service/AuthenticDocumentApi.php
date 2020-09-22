@@ -12,10 +12,12 @@ use DBP\API\AuthenticDocumentBundle\Entity\AuthenticDocumentRequest;
 use DBP\API\AuthenticDocumentBundle\Entity\AuthenticDocumentType;
 use DBP\API\AuthenticDocumentBundle\Helpers\Tools;
 use DBP\API\AuthenticDocumentBundle\Message\AuthenticDocumentRequestMessage;
+use DBP\API\CoreBundle\Entity\Person;
 use DBP\API\CoreBundle\Exception\ItemNotLoadedException;
 use DBP\API\CoreBundle\Helpers\JsonException;
 use DBP\API\CoreBundle\Helpers\Tools as CoreTools;
 use DBP\API\CoreBundle\Service\GuzzleLogger;
+use DBP\API\CoreBundle\Service\PersonProviderInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
@@ -34,13 +36,21 @@ class AuthenticDocumentApi
     private $bus;
 
     private $clientHandler;
+
     private $guzzleLogger;
 
-    public function __construct(MessageBusInterface $bus, GuzzleLogger $guzzleLogger)
+    /**
+     * @var PersonProviderInterface
+     */
+    private $personProvider;
+
+
+    public function __construct(MessageBusInterface $bus, GuzzleLogger $guzzleLogger, PersonProviderInterface $personProvider)
     {
         $this->bus = $bus;
         $this->clientHandler = null;
         $this->guzzleLogger = $guzzleLogger;
+        $this->personProvider = $personProvider;
     }
 
     /**
@@ -69,11 +79,28 @@ class AuthenticDocumentApi
      * Creates Symfony message and dispatch delayed message to download a document from egiz in the future.
      *
      * @param AuthenticDocumentRequest $authenticDocumentRequest
+     * @param string $authorizationHeader
      * @return AuthenticDocumentRequestMessage
+     * @throws GuzzleException
+     * @throws ItemNotLoadedException
      */
-    public function createAndDispatchAuthenticDocumentRequestMessage(AuthenticDocumentRequest $authenticDocumentRequest)
+    public function createAndDispatchAuthenticDocumentRequestMessage(
+        AuthenticDocumentRequest $authenticDocumentRequest, string $authorizationHeader)
     {
         $token = $authenticDocumentRequest->getToken();
+        $tokenInformation = $this->fetchTokenInformation($token);
+
+        dump($tokenInformation);
+        // TODO: check if there are multiple people and throw exception
+        $people = $this->personProvider->getPersonsByNameAndBirthday(
+            $tokenInformation["givenName"], $tokenInformation["familyName"], $tokenInformation["birthDate"]);
+        dump($people);
+
+//        $signer = new HS256('12345678901234567890123456789012');
+//        $parser = new Parser($signer);
+//        $claims = $parser->parse($token);
+//        dump($claims);
+
         $typeId = $authenticDocumentRequest->getTypeId();
         $authenticDocumentType = $this->getAuthenticDocumentType($typeId, ["token" => $token]);
         $availabilityStatus = $authenticDocumentType->getAvailabilityStatus();
@@ -84,17 +111,12 @@ class AuthenticDocumentApi
 
         $estimatedTimeOfArrival = $authenticDocumentType->getEstimatedTimeOfArrival();
         $documentToken = $authenticDocumentType->getDocumentToken();
-        $seconds = $estimatedTimeOfArrival->getTimestamp() - time();
-
-        if ($seconds < 0) {
-            $seconds = 0;
-        }
 
         $message = new AuthenticDocumentRequestMessage($documentToken, $typeId, $estimatedTimeOfArrival);
 
         $this->bus->dispatch(
             $message, [
-            new DelayStamp($seconds * 1000),
+            $this->getDelayStampFromAuthenticDocumentType($authenticDocumentType),
         ]);
 
         return $message;
@@ -120,7 +142,6 @@ class AuthenticDocumentApi
      * Handle Symfony Message AuthenticDocumentRequestMessage to download the document from the egiz server.
      *
      * @param AuthenticDocumentRequestMessage $message
-     * @throws ItemNotLoadedException
      */
     public function handleRequestMessage(AuthenticDocumentRequestMessage $message)
     {
@@ -155,19 +176,91 @@ class AuthenticDocumentApi
 
                 break;
             case "requested":
-                // TODO: If document is not yet available dispatch a new delayed message
+                // if document is not yet available dispatch a new delayed message
                 $newMessage = clone $message;
                 $newMessage->incRetry();
+                $newMessage->setEstimatedResponseDate($authenticDocumentType->getEstimatedTimeOfArrival());
 
-//                $this->bus->dispatch(new AuthenticDocumentRequestMessage($documentToken, $urlAttribute, $date), [
-//                    new DelayStamp($seconds * 1000)
-//                ]);
+                // wait at least 30 sec
+                $this->bus->dispatch($newMessage, [
+                    $this->getDelayStampFromAuthenticDocumentType($authenticDocumentType, 30)
+                ]);
                 break;
             default:
                 // TODO: Handle "document not available"
+                // TODO: match user
 //                throw new NotFoundHttpException("AuthenticDocument was not found!");
                 break;
         }
+    }
+
+    /**
+     * Returns:
+     * [
+     *   ...
+     *   "birthdate" => "1994-12-31"
+     *   "given_name" => "XXXClaus - Maria"
+     *   "family_name" => "XXXvon Brandenburg"
+     * ]
+
+     * @param $token
+     * @return array
+     * @throws GuzzleException
+     * @throws ItemNotLoadedException
+     */
+    public function fetchTokenInformation($token): array {
+        // TODO: Do we need a setting for this url?
+        $url = "https://eid.egiz.gv.at/idp/profile/oidc/userinfo";
+
+        $client = $this->getClient();
+
+        $options = [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $token,
+            ],
+        ];
+
+        try {
+            // http://docs.guzzlephp.org/en/stable/quickstart.html?highlight=get#making-a-request
+            $response = $client->request('GET', $url, $options);
+
+            //  Returns:
+            //  [
+            //    ...
+            //    "birthdate" => "1994-12-31"
+            //    "given_name" => "XXXClaus - Maria"
+            //    "family_name" => "XXXvon Brandenburg"
+            // ]
+            $data = $this->decodeResponse($response);
+
+            return [
+                "birthDate" => new \DateTime($data["birthdate"]),
+                "givenName" => $data["given_name"],
+                "familyName" => $data["family_name"]
+            ];
+        } catch (\Exception $e) {
+            throw new ItemNotLoadedException(sprintf('Token information could not be loaded! Message: %s', $e->getMessage()));
+        }
+    }
+
+    public function fetchPersonByTokenInformation($tokenInformation): ?Person {
+        $person = $this->personProvider->getCurrentPerson();
+    }
+
+    /**
+     * @param $authenticDocumentType
+     * @param int $minDelayTime [sec]
+     * @return DelayStamp
+     */
+    public function getDelayStampFromAuthenticDocumentType($authenticDocumentType, $minDelayTime = 0): DelayStamp {
+        $estimatedTimeOfArrival = $authenticDocumentType->getEstimatedTimeOfArrival();
+        $seconds = $estimatedTimeOfArrival->getTimestamp() - time();
+
+        if ($seconds < $minDelayTime) {
+            $seconds = $minDelayTime;
+        }
+
+        return new DelayStamp($seconds * 1000);
     }
 
     /**
