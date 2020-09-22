@@ -234,15 +234,7 @@ class AuthenticDocumentApi
             $response = $client->request('GET', $url, $options);
 
             return $this->decodeResponse($response);
-        } catch (RequestException $e) {
-            $response = $e->getResponse();
-            $body = $response->getBody();
-            $message = $body->getContents();
-
-            throw new ItemNotLoadedException(sprintf('Document Types could not be loaded! Message: %s', $message));
-        } catch (GuzzleException $e) {
-            throw new ItemNotLoadedException(sprintf('Document Types could not be loaded! Message: %s', $e->getMessage()));
-        } catch (ItemNotLoadedException $e) {
+        } catch (\Exception $e) {
             throw new ItemNotLoadedException(sprintf('Document Types could not be loaded! Message: %s', $e->getMessage()));
         }
     }
