@@ -88,19 +88,6 @@ class AuthenticDocumentApi
         AuthenticDocumentRequest $authenticDocumentRequest, string $authorizationHeader)
     {
         $token = $authenticDocumentRequest->getToken();
-        $tokenInformation = $this->fetchTokenInformation($token);
-
-        dump($tokenInformation);
-        // TODO: check if there are multiple people and throw exception
-        $people = $this->personProvider->getPersonsByNameAndBirthday(
-            $tokenInformation["givenName"], $tokenInformation["familyName"], $tokenInformation["birthDate"]);
-        dump($people);
-
-//        $signer = new HS256('12345678901234567890123456789012');
-//        $parser = new Parser($signer);
-//        $claims = $parser->parse($token);
-//        dump($claims);
-
         $typeId = $authenticDocumentRequest->getTypeId();
         $authenticDocumentType = $this->getAuthenticDocumentType($typeId, ["token" => $token]);
         $availabilityStatus = $authenticDocumentType->getAvailabilityStatus();
@@ -109,10 +96,26 @@ class AuthenticDocumentApi
             throw new NotFoundHttpException("Document is not available");
         }
 
+        // we can decode the token here after if was proven valid by the request in getAuthenticDocumentType
+        $tokenInformation = $this->fetchTokenInformation($token);
+        $givenName = $tokenInformation["givenName"];
+        $familyName = $tokenInformation["familyName"];
+        $birthDay = $tokenInformation["birthDate"];
+
+        // try to match name and birthday to a person
+        $people = $this->personProvider->getPersonsByNameAndBirthday($givenName, $familyName, $birthDay);
+        $peopleCount = count($people);
+
+        if ($peopleCount == 0) {
+            throw new NotFoundHttpException("Person $givenName $familyName could not be found!");
+        } else if ($peopleCount > 1) {
+            throw new NotFoundHttpException("Multiple people with name $givenName $familyName were found!");
+        }
+
         $estimatedTimeOfArrival = $authenticDocumentType->getEstimatedTimeOfArrival();
         $documentToken = $authenticDocumentType->getDocumentToken();
 
-        $message = new AuthenticDocumentRequestMessage($documentToken, $typeId, $estimatedTimeOfArrival);
+        $message = new AuthenticDocumentRequestMessage($people[0], $documentToken, $typeId, $estimatedTimeOfArrival);
 
         $this->bus->dispatch(
             $message, [
@@ -145,6 +148,7 @@ class AuthenticDocumentApi
      */
     public function handleRequestMessage(AuthenticDocumentRequestMessage $message)
     {
+        dump($message);
         $documentToken = $message->getDocumentToken();
         $typeId = $message->getTypeId();
         $filters = ["token" => $documentToken];

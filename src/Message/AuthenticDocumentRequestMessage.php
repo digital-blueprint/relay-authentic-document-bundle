@@ -4,8 +4,15 @@ declare(strict_types=1);
 
 namespace DBP\API\AuthenticDocumentBundle\Message;
 
+use DBP\API\CoreBundle\Entity\Person;
+
 class AuthenticDocumentRequestMessage
 {
+    /**
+     * @var Person|null
+     */
+    private $person;
+
     /**
      * @var string
      */
@@ -26,12 +33,26 @@ class AuthenticDocumentRequestMessage
      */
     private $retry = 0;
 
-    public function __construct($documentToken, $typeId, \DateTime $estimatedResponseDate, int $retry = 0)
+    /**
+     * AuthenticDocumentRequestMessage constructor.
+     * @param $person Person|null
+     * @param $documentToken
+     * @param $typeId
+     * @param \DateTime $estimatedResponseDate
+     * @param int $retry
+     */
+    public function __construct(?Person $person, $documentToken, $typeId, \DateTime $estimatedResponseDate, int $retry = 0)
     {
+        $this->person = $person;
         $this->documentToken = $documentToken;
         $this->typeId = $typeId;
         $this->estimatedResponseDate = $estimatedResponseDate;
         $this->retry = $retry;
+    }
+
+    public function getPerson(): ?Person
+    {
+        return $this->person;
     }
 
     public function getDocumentToken(): string
