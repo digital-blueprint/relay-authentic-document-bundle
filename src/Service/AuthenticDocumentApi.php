@@ -191,9 +191,22 @@ class AuthenticDocumentApi
                 ]);
                 break;
             default:
-                // TODO: Handle "document not available"
-                // TODO: match user
-//                throw new NotFoundHttpException("AuthenticDocument was not found!");
+                $person = $message->getPerson();
+
+                // we can't report that the document isn't available if there is no person attached to the message
+                if (!($person instanceof Person)) {
+                    return;
+                }
+
+                $email = $person->getEmail();
+
+                // we can't report that the document isn't available if there is no email address
+                if ($email === null || $email === "") {
+                    return;
+                }
+
+                // TODO: Send "document not available" email
+
                 break;
         }
     }
