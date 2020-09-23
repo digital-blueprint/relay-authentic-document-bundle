@@ -47,7 +47,7 @@ final class AuthenticDocumentRequestDataPersister implements DataPersisterInterf
         $message = $api->createAndDispatchAuthenticDocumentRequestMessage($authenticImageRequest, $authorizationHeader);
 
         // TODO: Is there a better identifier? (not that we would need one)
-        $authenticImageRequest->setIdentifier($typeId.'-'.time());
+        $authenticImageRequest->setIdentifier($typeId . '-' . time());
         $authenticImageRequest->setEstimatedTimeOfArrival($message->getEstimatedResponseDate());
 
         return $authenticImageRequest;
