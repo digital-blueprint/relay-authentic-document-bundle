@@ -68,6 +68,14 @@ class AuthenticDocumentRequest
      */
     private $estimatedTimeOfArrival;
 
+    /**
+     * @ApiProperty(iri="https://schema.org/dateCreated")
+     * @Groups({"AuthenticDocumentRequest:output"})
+     *
+     * @var \DateTime
+     */
+    private $dateCreated;
+
     public function setIdentifier(string $identifier): self
     {
         $this->identifier = $identifier;
@@ -119,6 +127,25 @@ class AuthenticDocumentRequest
     public function setEstimatedTimeOfArrival(?\DateTime $estimatedTimeOfArrival): self
     {
         $this->estimatedTimeOfArrival = $estimatedTimeOfArrival;
+
+        return $this;
+    }
+
+    /**
+     * @return \DateTime|null
+     */
+    public function getDateCreated(): ?\DateTime
+    {
+        return $this->dateCreated;
+    }
+
+    /**
+     * @param \DateTime $dateCreated
+     * @return AuthenticDocumentRequest
+     */
+    public function setDateCreated(\DateTime $dateCreated): self
+    {
+        $this->dateCreated = $dateCreated;
 
         return $this;
     }

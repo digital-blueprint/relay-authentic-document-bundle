@@ -49,6 +49,7 @@ final class AuthenticDocumentRequestDataPersister implements DataPersisterInterf
         // TODO: Is there a better identifier? (not that we would need one)
         $authenticDocumentRequest->setIdentifier($typeId . '-' . time());
         $authenticDocumentRequest->setEstimatedTimeOfArrival($message->getEstimatedResponseDate());
+        $authenticDocumentRequest->setDateCreated(new \DateTime());
 
         return $authenticDocumentRequest;
     }
