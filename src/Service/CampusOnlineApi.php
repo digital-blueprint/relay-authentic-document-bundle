@@ -26,4 +26,19 @@ class CampusOnlineApi implements AuthenticDocumentHandlerProviderInterface
         $fileExtension = Tools::getFileExtensionForMimeType($mimeType);
         file_put_contents($path . "/" . $documentType . "." . $fileExtension, $documentData);
     }
+
+    public function handleAuthenticDocumentFetchException(Person $person, string $documentType, string $message) {
+        // TODO: send email to $person
+    }
+
+    public function handleAuthenticDocumentNotAvailable(Person $person, string $documentType) {
+        $email = $person->getEmail();
+
+        // we can't report that the document isn't available if there is no email address
+        if ($email === null || $email === "") {
+            return;
+        }
+
+        // TODO: Send "document not available" email
+    }
 }

@@ -178,7 +178,11 @@ class AuthenticDocumentApi
                         $message->getPerson(),
                         $typeId,
                         $data);
-                } catch (ItemNotLoadedException $e) {
+                } catch (\Exception $e) {
+                    $this->authenticDocumentHandlerProvider->handleAuthenticDocumentFetchException(
+                        $message->getPerson(),
+                        $typeId,
+                        $e->getMessage());
                 }
 
                 break;
@@ -194,22 +198,9 @@ class AuthenticDocumentApi
                 ]);
                 break;
             default:
-                $person = $message->getPerson();
-
-                // we can't report that the document isn't available if there is no person attached to the message
-                if (!($person instanceof Person)) {
-                    return;
-                }
-
-                $email = $person->getEmail();
-
-                // we can't report that the document isn't available if there is no email address
-                if ($email === null || $email === "") {
-                    return;
-                }
-
-                // TODO: Send "document not available" email
-
+                $this->authenticDocumentHandlerProvider->handleAuthenticDocumentNotAvailable(
+                    $message->getPerson(),
+                    $typeId);
                 break;
         }
     }
