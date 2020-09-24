@@ -10,6 +10,7 @@
         "guzzlehttp/guzzle": "^6.0",
         "myclabs/php-enum": "^1.7",
         "symfony/framework-bundle": "^4.1.12",
+        "symfony/mailer": "^v4.4.13",
         "symfony/messenger": "^4.4"
     },
     "require-dev": {

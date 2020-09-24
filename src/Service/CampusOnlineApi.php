@@ -6,9 +6,21 @@ namespace DBP\API\AuthenticDocumentBundle\Service;
 
 use DBP\API\AuthenticDocumentBundle\Helpers\Tools;
 use DBP\API\CoreBundle\Entity\Person;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 
 class CampusOnlineApi implements AuthenticDocumentHandlerProviderInterface
 {
+    /**
+     * @var MailerInterface
+     */
+    private $mailer;
+
+    public function __construct(MailerInterface $mailer)
+    {
+        $this->mailer = $mailer;
+    }
+
     public function persistAuthenticDocument(
         Person $person,
         \DateTime $requestCreatedDate,
@@ -26,6 +38,17 @@ class CampusOnlineApi implements AuthenticDocumentHandlerProviderInterface
         if (!is_dir($path)) {
             mkdir($path);
         }
+
+        // TODO: send email (keep in mind tugraz.at seems to deny mails from our docker smtp)
+//        $email = (new Email())
+//            ->from('patrizio.bekerle@tugraz.at')
+//            ->to('patrizio.bekerle@tugraz.at')
+//            ->subject('Time for Symfony Mailer!')
+//            ->text('Sending emails is fun again!')
+//            ->html('<p>See Twig integration for better HTML integration!</p>');
+//
+//        $this->mailer->send($email);
+//        dump($email);
 
         $mimeType = Tools::getMimeType($documentData);
         $fileExtension = Tools::getFileExtensionForMimeType($mimeType);
