@@ -29,6 +29,11 @@ class AuthenticDocumentRequestMessage
     private $estimatedResponseDate;
 
     /**
+     * @var \DateTime
+     */
+    private $requestCreatedDate;
+
+    /**
      * @var int
      */
     private $retry = 0;
@@ -38,14 +43,23 @@ class AuthenticDocumentRequestMessage
      * @param $person Person|null
      * @param $documentToken
      * @param $typeId
+     * @param \DateTime $requestCreatedDate
      * @param \DateTime $estimatedResponseDate
      * @param int $retry
      */
-    public function __construct(?Person $person, $documentToken, $typeId, \DateTime $estimatedResponseDate, int $retry = 0)
+    public function __construct(
+        ?Person $person,
+        $documentToken,
+        $typeId,
+        \DateTime $requestCreatedDate,
+        \DateTime $estimatedResponseDate,
+        int $retry = 0
+    )
     {
         $this->person = $person;
         $this->documentToken = $documentToken;
         $this->typeId = $typeId;
+        $this->requestCreatedDate = $requestCreatedDate;
         $this->estimatedResponseDate = $estimatedResponseDate;
         $this->retry = $retry;
     }
@@ -68,6 +82,11 @@ class AuthenticDocumentRequestMessage
     public function getEstimatedResponseDate(): \DateTime
     {
         return $this->estimatedResponseDate;
+    }
+
+    public function getRequestCreatedDate(): \DateTime
+    {
+        return $this->requestCreatedDate;
     }
 
     public function getRetry(): int

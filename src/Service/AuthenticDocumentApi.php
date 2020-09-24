@@ -127,9 +127,10 @@ class AuthenticDocumentApi
         }
 
         $estimatedTimeOfArrival = $authenticDocumentType->getEstimatedTimeOfArrival();
+        $dateCreated = $authenticDocumentRequest->getDateCreated();
         $documentToken = $authenticDocumentType->getDocumentToken();
 
-        $message = new AuthenticDocumentRequestMessage($people[0], $documentToken, $typeId, $estimatedTimeOfArrival);
+        $message = new AuthenticDocumentRequestMessage($people[0], $documentToken, $typeId, $dateCreated, $estimatedTimeOfArrival);
 
         $this->bus->dispatch(
             $message, [
@@ -176,11 +177,13 @@ class AuthenticDocumentApi
 
                     $this->authenticDocumentHandlerProvider->persistAuthenticDocument(
                         $message->getPerson(),
+                        $message->getRequestCreatedDate(),
                         $typeId,
                         $data);
                 } catch (\Exception $e) {
                     $this->authenticDocumentHandlerProvider->handleAuthenticDocumentFetchException(
                         $message->getPerson(),
+                        $message->getRequestCreatedDate(),
                         $typeId,
                         $e->getMessage());
                 }
@@ -200,6 +203,7 @@ class AuthenticDocumentApi
             default:
                 $this->authenticDocumentHandlerProvider->handleAuthenticDocumentNotAvailable(
                     $message->getPerson(),
+                    $message->getRequestCreatedDate(),
                     $typeId);
                 break;
         }

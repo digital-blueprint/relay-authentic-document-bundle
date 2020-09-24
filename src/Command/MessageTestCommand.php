@@ -60,7 +60,7 @@ class MessageTestCommand extends Command
             + $delayInterval->i * 60 + $delayInterval->s;
         dump($seconds);
 
-        $this->bus->dispatch(new AuthenticDocumentRequestMessage($person, $date, '', new \DateTime()), [
+        $this->bus->dispatch(new AuthenticDocumentRequestMessage($person, $date, '', new \DateTime(), new \DateTime()), [
             // wait 5 seconds before processing
             new DelayStamp($seconds * 1000),
         ]);

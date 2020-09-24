@@ -42,14 +42,14 @@ final class AuthenticDocumentRequestDataPersister implements DataPersisterInterf
             throw new ItemNotStoredException("Token and typeId are mandatory!");
         }
 
+        // TODO: Is there a better identifier? (not that we would need one)
+        $authenticDocumentRequest->setIdentifier($typeId . '-' . time());
+        $authenticDocumentRequest->setDateCreated(new \DateTime());
         $api = $this->api;
         $authorizationHeader = $this->requestStack->getCurrentRequest()->headers->get('Authorization');
         $message = $api->createAndDispatchAuthenticDocumentRequestMessage($authenticDocumentRequest, $authorizationHeader);
 
-        // TODO: Is there a better identifier? (not that we would need one)
-        $authenticDocumentRequest->setIdentifier($typeId . '-' . time());
         $authenticDocumentRequest->setEstimatedTimeOfArrival($message->getEstimatedResponseDate());
-        $authenticDocumentRequest->setDateCreated(new \DateTime());
 
         return $authenticDocumentRequest;
     }

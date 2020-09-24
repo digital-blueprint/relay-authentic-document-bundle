@@ -9,7 +9,12 @@ use DBP\API\CoreBundle\Entity\Person;
 
 class CampusOnlineApi implements AuthenticDocumentHandlerProviderInterface
 {
-    public function persistAuthenticDocument(Person $person, string $documentType, string $documentData) {
+    public function persistAuthenticDocument(
+        Person $person,
+        \DateTime $requestCreatedDate,
+        string $documentType,
+        string $documentData
+    ) {
         // store document locally for testing
         $path = 'documents';
 
@@ -24,14 +29,14 @@ class CampusOnlineApi implements AuthenticDocumentHandlerProviderInterface
 
         $mimeType = Tools::getMimeType($documentData);
         $fileExtension = Tools::getFileExtensionForMimeType($mimeType);
-        file_put_contents($path . "/" . $documentType . "." . $fileExtension, $documentData);
+        file_put_contents($path . "/" . $documentType . "-" . $requestCreatedDate->format("Y-m-d-His") . "." . $fileExtension, $documentData);
     }
 
-    public function handleAuthenticDocumentFetchException(Person $person, string $documentType, string $message) {
+    public function handleAuthenticDocumentFetchException(Person $person, \DateTime $requestCreatedDate, string $documentType, string $message) {
         // TODO: send email to $person
     }
 
-    public function handleAuthenticDocumentNotAvailable(Person $person, string $documentType) {
+    public function handleAuthenticDocumentNotAvailable(Person $person, \DateTime $requestCreatedDate, string $documentType) {
         $email = $person->getEmail();
 
         // we can't report that the document isn't available if there is no email address
