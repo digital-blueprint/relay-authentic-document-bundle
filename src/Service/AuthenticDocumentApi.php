@@ -101,9 +101,9 @@ class AuthenticDocumentApi
         //       to be locked in into it and don't know if all data is available
         //       (https://auth-dev.tugraz.at/auth/realms/tugraz/broker/eid-oidc/token)
         $tokenInformation = $this->fetchTokenInformation($token);
-        $givenName = $tokenInformation["givenName"];
-        $familyName = $tokenInformation["familyName"];
-        $birthDay = $tokenInformation["birthDate"];
+        $givenName = $tokenInformation->givenName;
+        $familyName = $tokenInformation->familyName;
+        $birthDay = $tokenInformation->birthDate;
 
         // try to match name and birthday to a person
         $people = $this->personProvider->getPersonsByNameAndBirthday($givenName, $familyName, $birthDay);
@@ -215,20 +215,12 @@ class AuthenticDocumentApi
     }
 
     /**
-     * Returns:
-     * [
-     *   ...
-     *   "birthdate" => "1994-12-31"
-     *   "given_name" => "XXXClaus - Maria"
-     *   "family_name" => "XXXvon Brandenburg"
-     * ]
-
      * @param $token
-     * @return array
+     * @return TokenInformation
      * @throws GuzzleException
      * @throws ItemNotLoadedException
      */
-    public function fetchTokenInformation($token): array {
+    public function fetchTokenInformation($token): TokenInformation {
         // TODO: Do we need a setting for this url?
         $url = "https://eid.egiz.gv.at/idp/profile/oidc/userinfo";
 
@@ -253,11 +245,12 @@ class AuthenticDocumentApi
             // ]
             $data = $this->decodeResponse($response);
 
-            return [
-                "birthDate" => new \DateTime($data["birthdate"]),
-                "givenName" => $data["given_name"],
-                "familyName" => $data["family_name"]
-            ];
+            $tokenInformation = new TokenInformation();
+            $tokenInformation->birthDate = new \DateTime($data["birthdate"]);
+            $tokenInformation->givenName = $data["given_name"];
+            $tokenInformation->familyName = $data["family_name"];
+
+            return $tokenInformation;
         } catch (\Exception $e) {
             throw new ItemNotLoadedException(sprintf('Token information could not be loaded! Message: %s', $e->getMessage()));
         }
@@ -479,4 +472,21 @@ class AuthenticDocumentApi
 
         return $authenticDocument;
     }
+}
+
+class TokenInformation {
+    /**
+     * @var \DateTime
+     */
+    public $birthDate;
+
+    /**
+     * @var string
+     */
+    public $givenName;
+
+    /**
+     * @var string
+     */
+    public $familyName;
 }
