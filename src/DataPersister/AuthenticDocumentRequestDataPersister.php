@@ -28,29 +28,29 @@ final class AuthenticDocumentRequestDataPersister implements DataPersisterInterf
     }
 
     /**
-     * @param AuthenticDocumentRequest $authenticImageRequest
+     * @param AuthenticDocumentRequest $authenticDocumentRequest
      *
      * @return AuthenticDocumentRequest
      *
      * @throws \DBP\API\CoreBundle\Exception\ItemNotStoredException
      */
-    public function persist($authenticImageRequest)
+    public function persist($authenticDocumentRequest)
     {
-        $typeId = $authenticImageRequest->getTypeId();
+        $typeId = $authenticDocumentRequest->getTypeId();
 
-        if ($authenticImageRequest->getToken() == "" || $typeId == "") {
+        if ($authenticDocumentRequest->getToken() == "" || $typeId == "") {
             throw new ItemNotStoredException("Token and typeId are mandatory!");
         }
 
         $api = $this->api;
         $authorizationHeader = $this->requestStack->getCurrentRequest()->headers->get('Authorization');
-        $message = $api->createAndDispatchAuthenticDocumentRequestMessage($authenticImageRequest, $authorizationHeader);
+        $message = $api->createAndDispatchAuthenticDocumentRequestMessage($authenticDocumentRequest, $authorizationHeader);
 
         // TODO: Is there a better identifier? (not that we would need one)
-        $authenticImageRequest->setIdentifier($typeId . '-' . time());
-        $authenticImageRequest->setEstimatedTimeOfArrival($message->getEstimatedResponseDate());
+        $authenticDocumentRequest->setIdentifier($typeId . '-' . time());
+        $authenticDocumentRequest->setEstimatedTimeOfArrival($message->getEstimatedResponseDate());
 
-        return $authenticImageRequest;
+        return $authenticDocumentRequest;
     }
 
     /**
