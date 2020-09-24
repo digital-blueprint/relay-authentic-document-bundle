@@ -97,6 +97,9 @@ class AuthenticDocumentApi
         }
 
         // we can decode the token here after if was proven valid by the request in getAuthenticDocumentType
+        // note: it would also be possible to get the information from Keycloak directly but we don't want
+        //       to be locked in into it and don't know if all data is available
+        //       (https://auth-dev.tugraz.at/auth/realms/tugraz/broker/eid-oidc/token)
         $tokenInformation = $this->fetchTokenInformation($token);
         $givenName = $tokenInformation["givenName"];
         $familyName = $tokenInformation["familyName"];
