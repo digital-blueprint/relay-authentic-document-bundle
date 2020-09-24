@@ -172,7 +172,7 @@ class AuthenticDocumentApi
         switch ($authenticDocumentType->getAvailabilityStatus()) {
             case "available":
                 try {
-                    $data = $this->getAuthenticDocumentData($typeId, $filters);
+                    $data = $this->fetchAuthenticDocumentData($typeId, $filters);
 
                     $this->authenticDocumentHandlerProvider->persistAuthenticDocument(
                         $message->getPerson(),
@@ -408,7 +408,7 @@ class AuthenticDocumentApi
         return ($id === null) ? $mapping : ($mapping[$id] ?? "");
     }
 
-    public function getAuthenticDocumentData($id, $filters): string {
+    public function fetchAuthenticDocumentData($id, $filters): string {
         if ($id == "") {
             throw new NotFoundHttpException("No id was set");
         }
@@ -460,7 +460,7 @@ class AuthenticDocumentApi
      * @throws ItemNotLoadedException
      */
     public function getAuthenticDocument($id, $filters): AuthenticDocument {
-        $data = $this->getAuthenticDocumentData($id, $filters);
+        $data = $this->fetchAuthenticDocumentData($id, $filters);
         $mimeType = Tools::getMimeType($data);
         $fileExtension = Tools::getFileExtensionForMimeType($mimeType);
 
