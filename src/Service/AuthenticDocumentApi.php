@@ -44,13 +44,24 @@ class AuthenticDocumentApi
      */
     private $personProvider;
 
+    /**
+     * @var AuthenticDocumentHandlerProviderInterface
+     */
+    private $authenticDocumentHandlerProvider;
 
-    public function __construct(MessageBusInterface $bus, GuzzleLogger $guzzleLogger, PersonProviderInterface $personProvider)
+
+    public function __construct(
+        MessageBusInterface $bus,
+        GuzzleLogger $guzzleLogger,
+        PersonProviderInterface $personProvider,
+        AuthenticDocumentHandlerProviderInterface $authenticDocumentHandlerProvider
+    )
     {
         $this->bus = $bus;
         $this->clientHandler = null;
         $this->guzzleLogger = $guzzleLogger;
         $this->personProvider = $personProvider;
+        $this->authenticDocumentHandlerProvider = $authenticDocumentHandlerProvider;
     }
 
     /**
@@ -163,21 +174,10 @@ class AuthenticDocumentApi
                 try {
                     $data = $this->getAuthenticDocumentData($typeId, $filters);
 
-                    // store document locally for testing
-                    $path = 'documents';
-
-                    // the worker is run in the root path, the webserver is run in /public
-                    if (!Tools::endsWith(getcwd(), "/public")) {
-                        $path = "public/" . $path;
-                    }
-
-                    if (!is_dir($path)) {
-                        mkdir($path);
-                    }
-
-                    $mimeType = Tools::getMimeType($data);
-                    $fileExtension = Tools::getFileExtensionForMimeType($mimeType);
-                    file_put_contents($path . "/" . $typeId . "." . $fileExtension, $data);
+                    $this->authenticDocumentHandlerProvider->persistAuthenticDocument(
+                        $message->getPerson(),
+                        $typeId,
+                        $data);
                 } catch (ItemNotLoadedException $e) {
                 }
 

@@ -30,3 +30,15 @@ services:
     public: false
     autowire: true
     autoconfigure: true
+
+  DBP\API\AuthenticDocumentBundle\Service\CampusOnlineApi:
+    autowire: true
+    autoconfigure: true
+
+  DBP\API\AuthenticDocumentBundle\Service\AuthenticDocumentHandlerProviderInterface:
+    '@DBP\API\AuthenticDocumentBundle\Service\CampusOnlineApi'
+
+  # This alias exist so we can replace the service during tests
+  test.App\Service\AuthenticDocumentHandlerProviderInterface:
+    alias: 'DBP\API\AuthenticDocumentBundle\Service\AuthenticDocumentHandlerProviderInterface'
+    public: true
