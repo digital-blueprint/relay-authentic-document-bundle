@@ -31,6 +31,11 @@ services:
     autowire: true
     autoconfigure: true
 
+  DBP\API\AuthenticDocumentBundle\Command\MailTestCommand:
+    public: false
+    autowire: true
+    autoconfigure: true
+
   DBP\API\AuthenticDocumentBundle\Service\CampusOnlineApi:
     autowire: true
     autoconfigure: true

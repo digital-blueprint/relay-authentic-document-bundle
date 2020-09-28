@@ -41,16 +41,16 @@ class AuthenticDocumentRequestMessage
     /**
      * AuthenticDocumentRequestMessage constructor.
      * @param $person Person|null
-     * @param $documentToken
-     * @param $typeId
+     * @param $documentToken string for example 'photo-jpeg-available-token'
+     * @param $typeId string for example 'dummy-photo-jpeg-available'
      * @param \DateTime $requestCreatedDate
      * @param \DateTime $estimatedResponseDate
      * @param int $retry
      */
     public function __construct(
         ?Person $person,
-        $documentToken,
-        $typeId,
+        string $documentToken,
+        string $typeId,
         \DateTime $requestCreatedDate,
         \DateTime $estimatedResponseDate,
         int $retry = 0

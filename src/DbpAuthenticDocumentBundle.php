@@ -24,5 +24,11 @@ class DbpAuthenticDocumentBundle extends Bundle
                 ],
             ]);
         }
+
+        $container->loadFromExtension('framework', [
+            'mailer' => [
+                'dsn' => '%env(MAILER_DSN)%'
+            ]
+        ]);
     }
 }

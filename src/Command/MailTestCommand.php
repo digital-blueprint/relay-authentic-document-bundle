@@ -15,13 +15,15 @@ use DBP\API\CoreBundle\Service\PersonProviderInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
+use Symfony\Component\Mime\Email;
 
-class MessageTestCommand extends Command
+class MailTestCommand extends Command
 {
     // the name of the command (the part after "bin/console")
-    protected static $defaultName = 'dbp:message-test';
+    protected static $defaultName = 'dbp:mail-test';
 
     /**
      * @var MessageBusInterface
@@ -33,10 +35,16 @@ class MessageTestCommand extends Command
      */
     private $personProvider;
 
-    public function __construct(MessageBusInterface $bus, PersonProviderInterface $personProvider)
+    /**
+     * @var MailerInterface
+     */
+    private $mailer;
+
+    public function __construct(MessageBusInterface $bus, PersonProviderInterface $personProvider, MailerInterface $mailer)
     {
         $this->bus = $bus;
         $this->personProvider = $personProvider;
+        $this->mailer = $mailer;
 
         parent::__construct();
     }
@@ -48,22 +56,18 @@ class MessageTestCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $person = $this->personProvider->getPerson('woody007', true);
+        // TODO: send email (keep in mind tugraz.at seems to deny mails from our docker smtp)
+        $email = (new Email())
+            ->from('patrizio.bekerle@tugraz.at')
+//            ->to('patrizio.bekerle@tugraz.at')
+//            ->to('patrizio@bekerle.com')
+            ->to('cici@gmx.at')
+            ->subject('Time for Symfony Mailer!')
+            ->text('Sending emails is fun again!')
+            ->html('<p>See Twig integration for better HTML integration!</p>');
 
-        // date we would get from egiz
-        $date = new \DateTime();
-        // add 5 sec for testing
-        $date->add(new \DateInterval('PT5S'));
-
-        $delayInterval = $date->diff(new \DateTime());
-        $seconds = $delayInterval->days * 86400 + $delayInterval->h * 3600
-            + $delayInterval->i * 60 + $delayInterval->s;
-        dump($seconds);
-
-        $this->bus->dispatch(new AuthenticDocumentRequestMessage($person, 'photo-jpeg-available-token', 'dummy-photo-jpeg-available', new \DateTime(), $date), [
-            // wait 5 seconds before processing
-            new DelayStamp($seconds * 1000),
-        ]);
+        $this->mailer->send($email);
+        dump($email);
 
         return 0;
     }
