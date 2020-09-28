@@ -59,9 +59,7 @@ class MailTestCommand extends Command
         // TODO: send email (keep in mind tugraz.at seems to deny mails from our docker smtp)
         $email = (new Email())
             ->from('patrizio.bekerle@tugraz.at')
-//            ->to('patrizio.bekerle@tugraz.at')
-//            ->to('patrizio@bekerle.com')
-            ->to('cici@gmx.at')
+            ->to('patrizio.bekerle@tugraz.at')
             ->subject('Time for Symfony Mailer!')
             ->text('Sending emails is fun again!')
             ->html('<p>See Twig integration for better HTML integration!</p>');
