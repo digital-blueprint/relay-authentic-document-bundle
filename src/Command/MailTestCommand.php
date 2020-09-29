@@ -26,24 +26,12 @@ class MailTestCommand extends Command
     protected static $defaultName = 'dbp:mail-test';
 
     /**
-     * @var MessageBusInterface
-     */
-    private $bus;
-
-    /**
-     * @var PersonProviderInterface
-     */
-    private $personProvider;
-
-    /**
      * @var MailerInterface
      */
     private $mailer;
 
-    public function __construct(MessageBusInterface $bus, PersonProviderInterface $personProvider, MailerInterface $mailer)
+    public function __construct(MailerInterface $mailer)
     {
-        $this->bus = $bus;
-        $this->personProvider = $personProvider;
         $this->mailer = $mailer;
 
         parent::__construct();
