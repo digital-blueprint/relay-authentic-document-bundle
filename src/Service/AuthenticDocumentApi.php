@@ -251,10 +251,6 @@ class AuthenticDocumentApi
         }
     }
 
-    public function fetchPersonByTokenInformation($tokenInformation): ?Person {
-        $person = $this->personProvider->getCurrentPerson();
-    }
-
     /**
      * @param $authenticDocumentType
      * @param int $minDelayTime [sec]
