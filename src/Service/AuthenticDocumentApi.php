@@ -14,6 +14,7 @@ use DBP\API\AuthenticDocumentBundle\Helpers\Tools;
 use DBP\API\AuthenticDocumentBundle\Message\AuthenticDocumentRequestMessage;
 use DBP\API\CoreBundle\Entity\Person;
 use DBP\API\CoreBundle\Exception\ItemNotLoadedException;
+use DBP\API\CoreBundle\Helpers\GuzzleTools;
 use DBP\API\CoreBundle\Helpers\JsonException;
 use DBP\API\CoreBundle\Helpers\Tools as CoreTools;
 use DBP\API\CoreBundle\Service\GuzzleLogger;
@@ -81,7 +82,7 @@ class AuthenticDocumentApi
             'handler' => $stack,
         ];
 
-        $stack->push($this->guzzleLogger->getClientHandler());
+        $stack->push(GuzzleTools::createLoggerMiddleware($this->guzzleLogger));
 
         return new Client($client_options);
     }
