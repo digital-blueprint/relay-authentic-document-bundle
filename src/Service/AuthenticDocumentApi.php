@@ -17,7 +17,7 @@ use DBP\API\CoreBundle\Exception\ItemNotLoadedException;
 use DBP\API\CoreBundle\Helpers\GuzzleTools;
 use DBP\API\CoreBundle\Helpers\JsonException;
 use DBP\API\CoreBundle\Helpers\Tools as CoreTools;
-use DBP\API\CoreBundle\Service\GuzzleLogger;
+use DBP\API\CoreBundle\Service\DBPLogger;
 use DBP\API\CoreBundle\Service\PersonProviderInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use GuzzleHttp\Client;
@@ -38,7 +38,7 @@ class AuthenticDocumentApi
 
     private $clientHandler;
 
-    private $guzzleLogger;
+    private $logger;
 
     /**
      * @var PersonProviderInterface
@@ -53,14 +53,14 @@ class AuthenticDocumentApi
 
     public function __construct(
         MessageBusInterface $bus,
-        GuzzleLogger $guzzleLogger,
+        DBPLogger $logger,
         PersonProviderInterface $personProvider,
         AuthenticDocumentHandlerProviderInterface $authenticDocumentHandlerProvider
     )
     {
         $this->bus = $bus;
         $this->clientHandler = null;
-        $this->guzzleLogger = $guzzleLogger;
+        $this->logger = $logger;
         $this->personProvider = $personProvider;
         $this->authenticDocumentHandlerProvider = $authenticDocumentHandlerProvider;
     }
@@ -82,7 +82,7 @@ class AuthenticDocumentApi
             'handler' => $stack,
         ];
 
-        $stack->push(GuzzleTools::createLoggerMiddleware($this->guzzleLogger));
+        $stack->push(GuzzleTools::createLoggerMiddleware($this->logger));
 
         return new Client($client_options);
     }
