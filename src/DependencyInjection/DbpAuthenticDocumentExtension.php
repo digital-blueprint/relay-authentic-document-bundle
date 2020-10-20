@@ -6,20 +6,27 @@ namespace DBP\API\AuthenticDocumentBundle\DependencyInjection;
 
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
-class DbpAuthenticDocumentExtension extends Extension
+class DbpAuthenticDocumentExtension extends Extension implements PrependExtensionInterface
 {
+    public function prepend(ContainerBuilder $container)
+    {
+        // https://symfony.com/doc/4.4/messenger.html#transports-async-queued-messages
+        $this->extendArrayParameter($container, 'dbp_api.messenger_routing', [
+            'DBP\API\AuthenticDocumentBundle\Message\AuthenticDocumentRequestMessage' => 'async'
+        ]);
+    }
+
     public function load(array $configs, ContainerBuilder $container)
     {
-        $pathsToHide = [
+        $this->extendArrayParameter($container, 'dbp_api.paths_to_hide', [
             '/authentic_documents',
             '/authentic_document_requests',
             '/authentic_document_requests/{id}',
-        ];
-
-        $this->extendArrayParameter($container, 'dbp_api.paths_to_hide', $pathsToHide);
+        ]);
 
         $this->extendArrayParameter(
             $container, 'api_platform.resource_class_directories', [__DIR__.'/../Entity']);
