@@ -48,7 +48,7 @@ class MessageTestCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $person = $this->personProvider->getPerson('woody007', true);
+        $person = $this->personProvider->getPerson('woody007');
 
         // date we would get from egiz
         $date = new \DateTime();
