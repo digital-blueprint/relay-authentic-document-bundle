@@ -17,7 +17,6 @@ use DBP\API\CoreBundle\Exception\ItemNotLoadedException;
 use DBP\API\CoreBundle\Helpers\GuzzleTools;
 use DBP\API\CoreBundle\Helpers\JsonException;
 use DBP\API\CoreBundle\Helpers\Tools as CoreTools;
-use DBP\API\CoreBundle\Service\DBPLogger;
 use DBP\API\CoreBundle\Service\PersonProviderInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use GuzzleHttp\Client;
@@ -25,6 +24,7 @@ use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\HandlerStack;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
@@ -53,7 +53,7 @@ class AuthenticDocumentApi
 
     public function __construct(
         MessageBusInterface $bus,
-        DBPLogger $logger,
+        LoggerInterface $logger,
         PersonProviderInterface $personProvider,
         AuthenticDocumentHandlerProviderInterface $authenticDocumentHandlerProvider
     )
