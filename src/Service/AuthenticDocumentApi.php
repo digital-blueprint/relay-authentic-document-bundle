@@ -204,8 +204,6 @@ class AuthenticDocumentApi
     }
 
     /**
-     * @param $token
-     *
      * @throws GuzzleException
      * @throws ItemNotLoadedException
      */
@@ -247,7 +245,6 @@ class AuthenticDocumentApi
     }
 
     /**
-     * @param $authenticDocumentType
      * @param int $minDelayTime [sec]
      */
     public function getDelayStampFromAuthenticDocumentType($authenticDocumentType, $minDelayTime = 0): DelayStamp
@@ -281,9 +278,6 @@ class AuthenticDocumentApi
         return $collection;
     }
 
-    /**
-     * @param $id
-     */
     public function getAuthenticDocumentType($id, array $filters): AuthenticDocumentType
     {
         try {
@@ -447,9 +441,6 @@ class AuthenticDocumentApi
     }
 
     /**
-     * @param $id
-     * @param $filters
-     *
      * @throws ItemNotLoadedException
      */
     public function getAuthenticDocument($id, $filters): AuthenticDocument

@@ -41,9 +41,8 @@ class AuthenticDocumentRequestMessage
     /**
      * AuthenticDocumentRequestMessage constructor.
      *
-     * @param $person Person|null
-     * @param $documentToken string for example 'photo-jpeg-available-token'
-     * @param $typeId string for example 'dummy-photo-jpeg-available'
+     * @param string $documentToken for example 'photo-jpeg-available-token'
+     * @param string $typeId        for example 'dummy-photo-jpeg-available'
      */
     public function __construct(
         ?Person $person,
