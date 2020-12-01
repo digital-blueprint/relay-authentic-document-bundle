@@ -40,12 +40,10 @@ class AuthenticDocumentRequestMessage
 
     /**
      * AuthenticDocumentRequestMessage constructor.
+     *
      * @param $person Person|null
      * @param $documentToken string for example 'photo-jpeg-available-token'
      * @param $typeId string for example 'dummy-photo-jpeg-available'
-     * @param \DateTime $requestCreatedDate
-     * @param \DateTime $estimatedResponseDate
-     * @param int $retry
      */
     public function __construct(
         ?Person $person,
@@ -54,8 +52,7 @@ class AuthenticDocumentRequestMessage
         \DateTime $requestCreatedDate,
         \DateTime $estimatedResponseDate,
         int $retry = 0
-    )
-    {
+    ) {
         $this->person = $person;
         $this->documentToken = $documentToken;
         $this->typeId = $typeId;
@@ -105,7 +102,6 @@ class AuthenticDocumentRequestMessage
     }
 
     /**
-     * @param \DateTime $estimatedResponseDate
      * @return AuthenticDocumentRequestMessage
      */
     public function setEstimatedResponseDate(\DateTime $estimatedResponseDate): self

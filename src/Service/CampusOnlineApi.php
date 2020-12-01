@@ -31,8 +31,8 @@ class CampusOnlineApi implements AuthenticDocumentHandlerProviderInterface
         $path = 'documents';
 
         // the worker is run in the root path, the webserver is run in /public
-        if (!Tools::endsWith(getcwd(), "/public")) {
-            $path = "public/" . $path;
+        if (!Tools::endsWith(getcwd(), '/public')) {
+            $path = 'public/'.$path;
         }
 
         if (!is_dir($path)) {
@@ -52,18 +52,20 @@ class CampusOnlineApi implements AuthenticDocumentHandlerProviderInterface
 
         $mimeType = Tools::getMimeType($documentData);
         $fileExtension = Tools::getFileExtensionForMimeType($mimeType);
-        file_put_contents($path . "/" . $documentType . "-" . $requestCreatedDate->format("Y-m-d-His") . "." . $fileExtension, $documentData);
+        file_put_contents($path.'/'.$documentType.'-'.$requestCreatedDate->format('Y-m-d-His').'.'.$fileExtension, $documentData);
     }
 
-    public function handleAuthenticDocumentFetchException(Person $person, \DateTime $requestCreatedDate, string $documentType, string $message) {
+    public function handleAuthenticDocumentFetchException(Person $person, \DateTime $requestCreatedDate, string $documentType, string $message)
+    {
         // TODO: send email to $person
     }
 
-    public function handleAuthenticDocumentNotAvailable(Person $person, \DateTime $requestCreatedDate, string $documentType) {
+    public function handleAuthenticDocumentNotAvailable(Person $person, \DateTime $requestCreatedDate, string $documentType)
+    {
         $email = $person->getEmail();
 
         // we can't report that the document isn't available if there is no email address
-        if ($email === null || $email === "") {
+        if ($email === null || $email === '') {
             return;
         }
 

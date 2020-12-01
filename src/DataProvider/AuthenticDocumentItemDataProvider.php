@@ -7,7 +7,6 @@ namespace DBP\API\AuthenticDocumentBundle\DataProvider;
 use ApiPlatform\Core\DataProvider\ItemDataProviderInterface;
 use ApiPlatform\Core\DataProvider\RestrictedDataProviderInterface;
 use DBP\API\AuthenticDocumentBundle\Entity\AuthenticDocument;
-use DBP\API\AuthenticDocumentBundle\Entity\AuthenticDocumentType;
 use DBP\API\AuthenticDocumentBundle\Service\AuthenticDocumentApi;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -30,6 +29,7 @@ final class AuthenticDocumentItemDataProvider implements ItemDataProviderInterfa
 
     /**
      * @param array|int|string $id
+     *
      * @throws \DBP\API\CoreBundle\Exception\ItemNotLoadedException
      */
     public function getItem(string $resourceClass, $id, string $operationName = null, array $context = []): ?AuthenticDocument

@@ -122,6 +122,7 @@ class AuthenticDocumentRequest
 
     /**
      * @param ?\DateTime $estimatedTimeOfArrival
+     *
      * @return AuthenticDocumentRequest
      */
     public function setEstimatedTimeOfArrival(?\DateTime $estimatedTimeOfArrival): self
@@ -131,16 +132,12 @@ class AuthenticDocumentRequest
         return $this;
     }
 
-    /**
-     * @return \DateTime|null
-     */
     public function getDateCreated(): ?\DateTime
     {
         return $this->dateCreated;
     }
 
     /**
-     * @param \DateTime $dateCreated
      * @return AuthenticDocumentRequest
      */
     public function setDateCreated(\DateTime $dateCreated): self

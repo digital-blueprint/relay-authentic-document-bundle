@@ -110,6 +110,7 @@ class AuthenticDocumentType
 
     /**
      * @param ?string $name
+     *
      * @return AuthenticDocumentType
      */
     public function setName(?string $name): self
@@ -141,6 +142,7 @@ class AuthenticDocumentType
 
     /**
      * @param ?string $availabilityStatus
+     *
      * @return AuthenticDocumentType
      */
     public function setAvailabilityStatus(?string $availabilityStatus): self
@@ -160,6 +162,7 @@ class AuthenticDocumentType
 
     /**
      * @param ?string $documentToken
+     *
      * @return AuthenticDocumentType
      */
     public function setDocumentToken(?string $documentToken): self
@@ -179,6 +182,7 @@ class AuthenticDocumentType
 
     /**
      * @param ?\DateTime $expiryDate
+     *
      * @return AuthenticDocumentType
      */
     public function setExpiryDate(?\DateTime $expiryDate): self
@@ -198,6 +202,7 @@ class AuthenticDocumentType
 
     /**
      * @param ?\DateTime $estimatedTimeOfArrival
+     *
      * @return AuthenticDocumentType
      */
     public function setEstimatedTimeOfArrival(?\DateTime $estimatedTimeOfArrival): self

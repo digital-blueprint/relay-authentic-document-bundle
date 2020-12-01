@@ -38,12 +38,12 @@ final class AuthenticDocumentRequestDataPersister implements DataPersisterInterf
     {
         $typeId = $authenticDocumentRequest->getTypeId();
 
-        if ($authenticDocumentRequest->getToken() == "" || $typeId == "") {
-            throw new ItemNotStoredException("Token and typeId are mandatory!");
+        if ($authenticDocumentRequest->getToken() === '' || $typeId === '') {
+            throw new ItemNotStoredException('Token and typeId are mandatory!');
         }
 
         // TODO: Is there a better identifier? (not that we would need one)
-        $authenticDocumentRequest->setIdentifier($typeId . '-' . time());
+        $authenticDocumentRequest->setIdentifier($typeId.'-'.time());
         $authenticDocumentRequest->setDateCreated(new \DateTime());
         $api = $this->api;
         $authorizationHeader = $this->requestStack->getCurrentRequest()->headers->get('Authorization');
