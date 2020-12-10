@@ -18,6 +18,11 @@ class DbpAuthenticDocumentExtension extends Extension implements PrependExtensio
         $this->extendArrayParameter($container, 'dbp_api.messenger_routing', [
             'DBP\API\AuthenticDocumentBundle\Message\AuthenticDocumentRequestMessage' => 'async',
         ]);
+
+        // Used in the data providers
+        $this->extendArrayParameter(
+            $container, 'dbp_api.allow_headers', ['Token']
+        );
     }
 
     public function load(array $configs, ContainerBuilder $container)
