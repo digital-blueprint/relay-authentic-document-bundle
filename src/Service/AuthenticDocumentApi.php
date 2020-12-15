@@ -408,7 +408,7 @@ class AuthenticDocumentApi
                 $documentToken = $authenticDocumentType->getDocumentToken();
 
                 // TODO: Do we need a setting for this url?
-                $url = "https://eid.egiz.gv.at/documentHandler/documents/document/$urlAttribute";
+                $url = "https://eid.egiz.gv.at/documentHandler_p/documents/document/$urlAttribute";
 
                 $client = $this->getClient();
                 $options = [
