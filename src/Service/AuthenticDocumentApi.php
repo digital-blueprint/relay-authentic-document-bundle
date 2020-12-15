@@ -210,7 +210,7 @@ class AuthenticDocumentApi
     public function fetchTokenInformation($token): TokenInformation
     {
         // TODO: Do we need a setting for this url?
-        $url = 'https://eid.egiz.gv.at/idp/profile/oidc/userinfo';
+        $url = 'https://eid.egiz.gv.at/idp_p/profile/oidc/userinfo';
 
         $client = $this->getClient();
 
@@ -304,7 +304,7 @@ class AuthenticDocumentApi
         }
 
         // TODO: Do we need a setting for this url?
-        $url = 'https://eid.egiz.gv.at/documentHandler/documents/document/';
+        $url = 'https://eid.egiz.gv.at/documentHandler_p/documents/document/';
 
         $client = $this->getClient();
 
