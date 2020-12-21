@@ -360,6 +360,7 @@ class AuthenticDocumentApi
             'urn:eidgvat:attributes.user.photo-jpeg-available' => 'Dokument 1',
             'urn:eidgvat:attributes.user.photo-png-available' => 'Dokument 2',
             'urn:eidgvat:attributes.user.photo-jpeg-not-available' => 'Dokument 3',
+            'urn:eidgvat:attributes.user.photo' => 'Foto',
         ];
 
         return ($key === null) ? $mapping : ($mapping[$key] ?? '');
@@ -377,6 +378,7 @@ class AuthenticDocumentApi
             'urn:eidgvat:attributes.user.photo-jpeg-available' => 'dummy-photo-jpeg-available',
             'urn:eidgvat:attributes.user.photo-png-available' => 'dummy-photo-png-available',
             'urn:eidgvat:attributes.user.photo-jpeg-not-available' => 'dummy-photo-jpeg-not-available',
+            'urn:eidgvat:attributes.user.photo' => 'photo',
         ];
 
         return ($key === null) ? $mapping : ($mapping[$key] ?? '');
