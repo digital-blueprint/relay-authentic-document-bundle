@@ -13,6 +13,7 @@ use DBP\API\AuthenticDocumentBundle\Entity\AuthenticDocumentType;
 use DBP\API\AuthenticDocumentBundle\Helpers\Tools;
 use DBP\API\AuthenticDocumentBundle\Message\AuthenticDocumentRequestMessage;
 use DBP\API\CoreBundle\Entity\Person;
+use DBP\API\CoreBundle\Exception\ApiError;
 use DBP\API\CoreBundle\Exception\ItemNotLoadedException;
 use DBP\API\CoreBundle\Helpers\GuzzleTools;
 use DBP\API\CoreBundle\Helpers\JsonException;
@@ -25,6 +26,8 @@ use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\HandlerStack;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
@@ -204,8 +207,7 @@ class AuthenticDocumentApi
     }
 
     /**
-     * @throws GuzzleException
-     * @throws ItemNotLoadedException
+     * @throws HttpException
      */
     public function fetchTokenInformation($token): TokenInformation
     {
@@ -234,13 +236,18 @@ class AuthenticDocumentApi
             $data = $this->decodeResponse($response);
 
             $tokenInformation = new TokenInformation();
-            $tokenInformation->birthDate = new \DateTime($data['birthdate']);
-            $tokenInformation->givenName = $data['given_name'];
-            $tokenInformation->familyName = $data['family_name'];
+            $tokenInformation->birthDate = new \DateTime($data['birthdate'] ?? '');
+            $tokenInformation->givenName = $data['given_name'] ?? '';
+            $tokenInformation->familyName = $data['family_name'] ?? '';
+            $tokenInformation->subject = $data['sub'];
 
             return $tokenInformation;
-        } catch (\Exception $e) {
-            throw new ItemNotLoadedException(sprintf('Token information could not be loaded! Message: %s', $e->getMessage()));
+        } catch (RequestException $e) {
+            if ($e->getResponse() !== null && $e->getResponse()->getStatusCode() === Response::HTTP_BAD_REQUEST) {
+                throw new ApiError(Response::HTTP_FORBIDDEN, 'Token invalid');
+            } else {
+                throw new HttpException(Response::HTTP_INTERNAL_SERVER_ERROR, sprintf('Token information could not be loaded! Message: %s', $e->getMessage()));
+            }
         }
     }
 
@@ -303,6 +310,12 @@ class AuthenticDocumentApi
             return [];
         }
 
+        $tokenInfo = $this->fetchTokenInformation($token);
+        // This is a dummy test user
+        if ($tokenInfo->subject === 'BF:s7BoRnRfJjQsENddRnbT48TO15E=') {
+            $token = 'photo-jpeg-available-token';
+        }
+
         // TODO: Do we need a setting for this url?
         $url = 'https://eid.egiz.gv.at/documentHandler_p/documents/document/';
 
@@ -328,7 +341,7 @@ class AuthenticDocumentApi
     {
         $authenticDocumentType = new AuthenticDocumentType();
         $availabilityStatus = $item['availability_status'];
-        $estimatedTimeOfArrival = $item['eta'] !== null ? new \DateTime($item['eta']) : null;
+        $estimatedTimeOfArrival = isset($item['eta']) ? new \DateTime($item['eta']) : null;
         if ($availabilityStatus === 'available') {
             $estimatedTimeOfArrival = new \DateTime();
         }
@@ -341,8 +354,8 @@ class AuthenticDocumentApi
         $authenticDocumentType->setName(self::getAuthenticDocumentTypeKeyNameMapping($key));
         $authenticDocumentType->setUrlSafeAttribute($item['urlsafe_attribute']);
         $authenticDocumentType->setAvailabilityStatus($availabilityStatus);
-        $authenticDocumentType->setDocumentToken($item['document_token']);
-        $authenticDocumentType->setExpiryDate($item['expires'] !== null ? new \DateTime($item['expires']) : null);
+        $authenticDocumentType->setDocumentToken($item['document_token'] ?? null);
+        $authenticDocumentType->setExpiryDate(isset($item['expires']) ? new \DateTime($item['expires']) : null);
         $authenticDocumentType->setEstimatedTimeOfArrival($estimatedTimeOfArrival);
 
         return $authenticDocumentType;
@@ -477,4 +490,9 @@ class TokenInformation
      * @var string
      */
     public $familyName;
+
+    /**
+     * @var string
+     */
+    public $subject;
 }
