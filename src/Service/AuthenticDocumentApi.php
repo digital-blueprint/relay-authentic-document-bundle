@@ -450,6 +450,8 @@ class AuthenticDocumentApi
                 }
             case 'requested':
                 throw new NotFoundHttpException('AuthenticDocument is not yet available!');
+            case 'not_available':
+                throw new NotFoundHttpException('AuthenticDocument is not available!');
             default:
                 throw new NotFoundHttpException('AuthenticDocument was not found!');
         }
