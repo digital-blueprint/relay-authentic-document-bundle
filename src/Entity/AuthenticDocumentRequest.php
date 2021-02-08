@@ -18,7 +18,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *             "status"=202,
  *             "openapi_context"={
  *                 "parameters"={
- *                    {"name"="body", "in"="body", "description"="Token", "type"="string", "example"={"token"="photo-jpeg-available-token", "typeId"="dummy-photo-jpeg-available"}, "required"="true"}
+ *                    {"name"="body", "in"="path", "description"="Token", "type"="string", "example"={"token"="photo-jpeg-available-token", "typeId"="dummy-photo-jpeg-available"}, "required"=true}
  *                 }
  *             },
  *         },
