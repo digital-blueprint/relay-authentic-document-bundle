@@ -11,7 +11,8 @@
         "myclabs/php-enum": "^1.7",
         "symfony/framework-bundle": "^4.1.12",
         "symfony/mailer": "^v4.4.13",
-        "symfony/messenger": "^4.4"
+        "symfony/messenger": "^4.4",
+        "ext-simplexml": "*"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^2.16",
