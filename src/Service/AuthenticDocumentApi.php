@@ -19,7 +19,6 @@ use DBP\API\CoreBundle\Helpers\GuzzleTools;
 use DBP\API\CoreBundle\Helpers\JsonException;
 use DBP\API\CoreBundle\Helpers\Tools as CoreTools;
 use DBP\API\CoreBundle\Service\PersonProviderInterface;
-use Doctrine\Common\Collections\ArrayCollection;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
@@ -267,19 +266,16 @@ class AuthenticDocumentApi
     }
 
     /**
-     * @return ArrayCollection|AuthenticDocumentType[]
+     * @return AuthenticDocumentType[]
      *
      * @throws ItemNotLoadedException
      */
-    public function getAuthenticDocumentTypes(array $filters): ArrayCollection
+    public function getAuthenticDocumentTypes(array $filters): array
     {
-        /** @var ArrayCollection<int,AuthenticDocumentType> $collection */
-        $collection = new ArrayCollection();
-
+        $collection = [];
         $authenticDocumentTypesJsonData = $this->getAuthenticDocumentTypesJsonData($filters);
-
         foreach ($authenticDocumentTypesJsonData as $key => $jsonData) {
-            $collection->add($this->authenticDocumentTypeFromJsonItem($key, $jsonData));
+            $collection[] = $this->authenticDocumentTypeFromJsonItem($key, $jsonData);
         }
 
         return $collection;
