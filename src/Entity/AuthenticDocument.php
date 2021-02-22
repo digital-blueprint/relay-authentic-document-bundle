@@ -12,27 +12,32 @@ use Symfony\Component\Serializer\Annotation\Groups;
  * Note: We need a "collectionOperations" setting for "get" to get an "entryPoint" in JSONLD.
  *
  * @ApiResource(
- *     collectionOperations={"get"},
+ *     collectionOperations={
+ *         "get"
+ *     },
  *     itemOperations={
- *         "get"={
- *             "openapi_context"={
- *                 "parameters"={
- *                    {"name"="id", "in"="path", "description"="Id of document to fetch", "required"=true, "type"="string", "example"="dummy-photo-jpeg-available"},
- *                    {"name"="token", "in"="header", "description"="Token", "type"="string", "example"="photo-jpeg-available-token", "required"=true}
+ *         "get" = {
+ *             "openapi_context" = {
+ *                 "parameters" = {
+ *                     {"name" = "id", "in" = "path", "description" = "Id of document to fetch", "required" = true, "type" = "string", "example" = "dummy-photo-jpeg-available"},
+ *                     {"name" = "token", "in" = "header", "description" = "Token", "type" = "string", "example" = "photo-jpeg-available-token", "required" = true}
  *                 }
  *             }
  *         }
  *     },
  *     iri="http://schema.org/MediaObject",
  *     description="Authentic document",
- *     normalizationContext={"jsonld_embed_context"=true, "groups"={"AuthenticDocument:output"}}
+ *     normalizationContext={
+ *         "jsonld_embed_context" = true,
+ *         "groups" = {"AuthenticDocument:output"}
+ *     }
  * )
  */
 class AuthenticDocument
 {
     /**
      * @Groups({"AuthenticDocument:output"})
-     * @ApiProperty(identifier=true,iri="https://schema.org/identifier")
+     * @ApiProperty(identifier=true, iri="https://schema.org/identifier")
      * Note: Every entity needs an identifier!
      */
     private $identifier;

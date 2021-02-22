@@ -12,27 +12,35 @@ use Symfony\Component\Serializer\Annotation\Groups;
  * Note: We need a "collectionOperations" setting for "get" to get an "entryPoint" in JSONLD.
  *
  * @ApiResource(
- *     collectionOperations={"get",
- *         "post"={
- *             "method"="POST",
- *             "status"=202,
- *             "openapi_context"={
- *                 "parameters"={
- *                    {"name"="body", "in"="path", "description"="Token", "type"="string", "example"={"token"="photo-jpeg-available-token", "typeId"="dummy-photo-jpeg-available"}, "required"=true}
+ *     collectionOperations={
+ *         "get",
+ *         "post" = {
+ *             "method" = "POST",
+ *             "status" = 202,
+ *             "openapi_context" = {
+ *                 "parameters" = {
+ *                     {"name" = "body", "in" = "path", "description" = "Token", "type" = "string", "example" = {"token" = "photo-jpeg-available-token", "typeId" = "dummy-photo-jpeg-available"}, "required" = true}
  *                 }
  *             },
  *         },
-      },
- *     itemOperations={"get"},
+ *     },
+ *     itemOperations={
+ *         "get"
+ *     },
  *     iri="https://schema.tugraz.at/AuthenticDocumentRequest",
- *     normalizationContext={"jsonld_embed_context"=true, "groups"={"AuthenticDocumentRequest:output"}},
- *     denormalizationContext={"groups"={"AuthenticDocumentRequest:input"}}
+ *     normalizationContext={
+ *         "jsonld_embed_context" = true,
+ *         "groups" = {"AuthenticDocumentRequest:output"}
+ *     },
+ *     denormalizationContext={
+ *         "groups" = {"AuthenticDocumentRequest:input"}
+ *     }
  * )
  */
 class AuthenticDocumentRequest
 {
     /**
-     * @ApiProperty(identifier=true,iri="https://schema.org/identifier")
+     * @ApiProperty(identifier=true, iri="https://schema.org/identifier")
      * Note: Every entity needs an identifier!
      */
     private $identifier;
@@ -42,9 +50,9 @@ class AuthenticDocumentRequest
      * @Groups({"AuthenticDocumentRequest:output", "AuthenticDocumentRequest:input"})
      * @ApiProperty(
      *     attributes={
-     *         "openapi_context"={
-     *             "type"="string",
-     *             "example"="photo-jpeg-available-token"
+     *         "openapi_context" = {
+     *             "type" = "string",
+     *             "example" = "photo-jpeg-available-token"
      *         }
      *     }
      * )

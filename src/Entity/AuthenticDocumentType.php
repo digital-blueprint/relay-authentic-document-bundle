@@ -13,34 +13,40 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *
  * @ApiResource(
  *     collectionOperations={
- *         "get"={
- *             "method"="GET",
- *             "openapi_context"={
- *                 "parameters"={
- *                    {"name"="token", "in"="header", "description"="Token", "type"="string", "example"="photo-jpeg-available-token", "required"=true}
+ *         "get" = {
+ *             "method" = "GET",
+ *             "openapi_context" = {
+ *                 "parameters" = {
+ *                     {"name" = "token", "in" = "header", "description" = "Token", "type" = "string", "example" = "photo-jpeg-available-token", "required" = true}
  *                 }
  *             },
  *         },
  *     },
- *     itemOperations={"get"={
- *             "method"="GET",
- *             "openapi_context"={
- *                 "parameters"={
- *                    {"name"="id", "in"="path", "description"="Id", "type"="string", "example"="dummy-photo-jpeg-available", "required"=true},
- *                    {"name"="token", "in"="header", "description"="Token", "type"="string", "example"="photo-jpeg-available-token", "required"=true}
+ *     itemOperations={
+ *         "get" = {
+ *             "method" = "GET",
+ *             "openapi_context" = {
+ *                 "parameters" = {
+ *                     {"name" = "id", "in" = "path", "description" = "Id", "type" = "string", "example" = "dummy-photo-jpeg-available", "required" = true},
+ *                     {"name" = "token", "in" = "header", "description" = "Token", "type" = "string", "example" = "photo-jpeg-available-token", "required" = true}
  *                 }
  *             },
  *         },
  *     },
  *     iri="https://schema.tugraz.at/AuthenticDocumentType",
- *     normalizationContext={"jsonld_embed_context"=true, "groups"={"AuthenticDocumentType:output"}},
- *     denormalizationContext={"groups"={"AuthenticDocumentRequest:input"}}
+ *     normalizationContext={
+ *         "jsonld_embed_context" = true,
+ *         "groups" = {"AuthenticDocumentType:output"}
+ *     },
+ *     denormalizationContext={
+ *         "groups" = {"AuthenticDocumentRequest:input"}
+ *     }
  * )
  */
 class AuthenticDocumentType
 {
     /**
-     * @ApiProperty(identifier=true,iri="https://schema.org/identifier")
+     * @ApiProperty(identifier=true, iri="https://schema.org/identifier")
      * @Groups({"AuthenticDocumentType:output"})
      * Note: Every entity needs an identifier!
      */
