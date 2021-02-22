@@ -12,11 +12,17 @@ use Symfony\Component\Serializer\Annotation\Groups;
  * Note: We need a "collectionOperations" setting for "get" to get an "entryPoint" in JSONLD.
  *
  * @ApiResource(
+ *     attributes={
+ *         "security" = "is_granted('IS_AUTHENTICATED_FULLY')"
+ *     },
  *     collectionOperations={
- *         "get"
+ *         "get" = {
+ *             "security" = "is_granted('IS_AUTHENTICATED_FULLY')"
+ *         }
  *     },
  *     itemOperations={
  *         "get" = {
+ *             "security" = "is_granted('IS_AUTHENTICATED_FULLY')",
  *             "openapi_context" = {
  *                 "parameters" = {
  *                     {"name" = "id", "in" = "path", "description" = "Id of document to fetch", "required" = true, "type" = "string", "example" = "dummy-photo-jpeg-available"},
