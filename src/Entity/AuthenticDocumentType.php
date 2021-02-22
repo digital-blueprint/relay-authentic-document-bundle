@@ -17,7 +17,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *     },
  *     collectionOperations={
  *         "get" = {
- *             "security" = "is_granted('IS_AUTHENTICATED_FULLY')"
+ *             "security" = "is_granted('IS_AUTHENTICATED_FULLY')",
  *             "method" = "GET",
  *             "openapi_context" = {
  *                 "parameters" = {
@@ -28,7 +28,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *     },
  *     itemOperations={
  *         "get" = {
- *             "security" = "is_granted('IS_AUTHENTICATED_FULLY')"
+ *             "security" = "is_granted('IS_AUTHENTICATED_FULLY')",
  *             "method" = "GET",
  *             "openapi_context" = {
  *                 "parameters" = {

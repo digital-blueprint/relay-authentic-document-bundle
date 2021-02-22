@@ -20,7 +20,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *             "security" = "is_granted('IS_AUTHENTICATED_FULLY')"
  *         },
  *         "post" = {
- *             "security" = "is_granted('IS_AUTHENTICATED_FULLY')"
+ *             "security" = "is_granted('IS_AUTHENTICATED_FULLY')",
  *             "method" = "POST",
  *             "status" = 202,
  *             "openapi_context" = {
