@@ -6,13 +6,14 @@
         "php": "^7.3",
         "ext-soap": "*",
         "api-platform/core": "^2.5",
-        "dbp/api-core-bundle": "@dev",
+        "dbp/api-core-bundle": "dev-main",
         "guzzlehttp/guzzle": "^7.0",
         "myclabs/php-enum": "^1.7",
         "symfony/framework-bundle": "^4.1.12",
         "symfony/mailer": "^v4.4.13",
         "symfony/messenger": "^4.4",
-        "ext-simplexml": "*"
+        "ext-simplexml": "*",
+        "league/uri": "^6.4"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^2.16",
