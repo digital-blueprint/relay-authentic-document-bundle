@@ -9,9 +9,10 @@ use ApiPlatform\Core\DataProvider\RestrictedDataProviderInterface;
 use DBP\API\AuthenticDocumentBundle\Entity\AuthenticDocumentType;
 use DBP\API\AuthenticDocumentBundle\Service\AuthenticDocumentApi;
 use DBP\API\CoreBundle\Helpers\ArrayFullPaginator;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RequestStack;
 
-final class AuthenticDocumentTypeCollectionDataProvider implements CollectionDataProviderInterface, RestrictedDataProviderInterface
+final class AuthenticDocumentTypeCollectionDataProvider extends AbstractController implements CollectionDataProviderInterface, RestrictedDataProviderInterface
 {
     public const ITEMS_PER_PAGE = 100;
 
@@ -35,6 +36,8 @@ final class AuthenticDocumentTypeCollectionDataProvider implements CollectionDat
      */
     public function getCollection(string $resourceClass, string $operationName = null, array $context = []): ArrayFullPaginator
     {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
         $api = $this->api;
         $filters = $context['filters'] ?? [];
 

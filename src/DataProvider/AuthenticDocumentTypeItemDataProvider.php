@@ -8,9 +8,10 @@ use ApiPlatform\Core\DataProvider\ItemDataProviderInterface;
 use ApiPlatform\Core\DataProvider\RestrictedDataProviderInterface;
 use DBP\API\AuthenticDocumentBundle\Entity\AuthenticDocumentType;
 use DBP\API\AuthenticDocumentBundle\Service\AuthenticDocumentApi;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RequestStack;
 
-final class AuthenticDocumentTypeItemDataProvider implements ItemDataProviderInterface, RestrictedDataProviderInterface
+final class AuthenticDocumentTypeItemDataProvider extends AbstractController implements ItemDataProviderInterface, RestrictedDataProviderInterface
 {
     private $api;
 
@@ -29,6 +30,8 @@ final class AuthenticDocumentTypeItemDataProvider implements ItemDataProviderInt
 
     public function getItem(string $resourceClass, $id, string $operationName = null, array $context = []): ?AuthenticDocumentType
     {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
         $api = $this->api;
         $filters = $context['filters'] ?? [];
 

@@ -8,9 +8,10 @@ use ApiPlatform\Core\DataPersister\DataPersisterInterface;
 use DBP\API\AuthenticDocumentBundle\Entity\AuthenticDocumentRequest;
 use DBP\API\AuthenticDocumentBundle\Service\AuthenticDocumentApi;
 use DBP\API\CoreBundle\Exception\ItemNotStoredException;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RequestStack;
 
-final class AuthenticDocumentRequestDataPersister implements DataPersisterInterface
+final class AuthenticDocumentRequestDataPersister extends AbstractController implements DataPersisterInterface
 {
     private $api;
 
@@ -36,6 +37,8 @@ final class AuthenticDocumentRequestDataPersister implements DataPersisterInterf
      */
     public function persist($authenticDocumentRequest)
     {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
         $typeId = $authenticDocumentRequest->getTypeId();
 
         if ($authenticDocumentRequest->getToken() === '' || $typeId === '') {
