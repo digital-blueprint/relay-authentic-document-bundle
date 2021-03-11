@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace DBP\API\AuthenticDocumentBundle\UCard;
 
 use DBP\API\CoreBundle\Helpers\GuzzleTools;
+use DBP\API\CoreBundle\Helpers\Tools as CoreTools;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\HandlerStack;
+use League\Uri\Uri;
 use League\Uri\UriTemplate;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
@@ -18,6 +20,9 @@ class UCardService
      * @var ?string
      */
     private $token;
+    /**
+     * @var ?string
+     */
     private $baseUrl;
     private $clientHandler;
     private $logger;
@@ -26,23 +31,49 @@ class UCardService
     {
         $this->token = null;
         $this->logger = $logger;
-        $this->baseUrl = 'https://online.tugraz.at/tug_online';
+        $this->baseUrl = null;
     }
 
-    public function setToken(string $token)
+    public function setBaseUrl(string $url): void
+    {
+        $this->baseUrl = $url;
+    }
+
+    public function fetchToken(string $clientId, string $clientSecret): array
+    {
+        if ($this->baseUrl === null) {
+            throw new \ValueError('baseUrl is not set');
+        }
+        $client = new Client();
+        $response = $client->post($this->baseUrl.'/wbOAuth2.token', [
+            'form_params' => [
+                'client_id' => $clientId,
+                'client_secret' => $clientSecret,
+                'grant_type' => 'client_credentials',
+            ],
+        ]);
+        $data = $response->getBody()->getContents();
+
+        return CoreTools::decodeJSON($data, true);
+    }
+
+    public function setToken(string $token): void
     {
         $this->token = $token;
     }
 
-    public function setClientHandler(?object $handler)
+    public function setClientHandler(?object $handler): void
     {
         $this->clientHandler = $handler;
     }
 
     private function getClient(): Client
     {
+        if ($this->baseUrl === null) {
+            throw new \ValueError('baseUrl is not set');
+        }
         if ($this->token === null) {
-            throw new \UnexpectedValueException('token is not set');
+            throw new \ValueError('token is not set');
         }
         $stack = HandlerStack::create($this->clientHandler);
         $base_uri = $this->baseUrl;
@@ -53,6 +84,10 @@ class UCardService
         $client_options = [
             'base_uri' => $base_uri,
             'handler' => $stack,
+            'headers' => [
+                'Authorization' => 'Bearer '.$this->token,
+                'Accept' => 'application/json',
+            ],
         ];
 
         $stack->push(GuzzleTools::createLoggerMiddleware($this->logger));
@@ -62,80 +97,114 @@ class UCardService
         return $client;
     }
 
-    public function getCardForIdent(string $ident): UCard
+    /**
+     * @return UCard[]
+     */
+    public function getCardsForIdent(string $ident, ?string $cardType = null): array
     {
-        $filter = 'IDENT_NR_OBFUSCATED-eq='.$ident;
-        $uriTemplate = new UriTemplate('pl/rest/brm.pm.extension.ucardfoto{?access_token,%24filter}');
+        // Filtering breaks if the value is empty, so don't allow
+        if (strlen($ident) === 0) {
+            throw new \ValueError('empty ident not allowed');
+        }
+
+        // In theory we could fetch all cards, but it seems to be limited to 500, so don't expose
+        // this functionality for now
+        $filters[] = 'IDENT_NR_OBFUSCATED-eq='.$ident;
+        if ($cardType !== null) {
+            if (strlen($cardType) === 0) {
+                throw new \ValueError('empty cardType not allowed');
+            }
+            $filters[] = 'CARD_TYPE-eq='.$cardType;
+        }
+
+        $uriTemplate = new UriTemplate('pl/rest/brm.pm.extension.ucardfoto{?%24filter,%24format,%24ctx,%24top}');
         $uri = (string) $uriTemplate->expand([
-            'access_token' => $this->token,
-            '%24filter' => $filter,
+            '%24filter' => implode(';', $filters),
+            '%24format' => 'json',
+            '%24ctx' => 'lang=en',
+            '%24top' => '-1', // return all (seems to be limited to 500 still)
         ]);
 
         $client = $this->getClient();
         try {
             $response = $client->get($uri);
         } catch (RequestException $e) {
-            throw new UCardException($e->getMessage());
+            throw $this->_getResponseError($e);
         }
 
         return $this->parseGetResponse($response);
     }
 
-    public function parseGetResponse(ResponseInterface $response): UCard
-    {
-        $content = (string) $response->getBody();
-
-        $xml = new \SimpleXMLElement($content);
-
-        $pic = $xml->xpath('/codata:resources/resource/content/plsqlCardPictureDto');
-        if ($pic === false || count($pic) !== 1) {
-            throw new UCardException('missing content');
-        }
-        $picArray = (array) $pic[0];
-
-        // TODO: more error handling
-        $cardType = $picArray['CARD_TYPE'];
-        $ident = $picArray['IDENT_NR_OBFUSCATED'];
-        $contentId = $picArray['CONTENT_ID'];
-        $isUpdatable = $picArray['IS_UPDATABLE'] === 'true';
-        $contentSize = intval($picArray['CONTENT_SIZE']);
-
-        return new UCard($ident, $cardType, $contentId, $contentSize, $isUpdatable);
-    }
-
+    /**
+     * @throws UCardException
+     */
     public function getCardPicture(UCard $card): UCardPicture
     {
-        $uriTemplate = new UriTemplate('pl/rest/brm.pm.extension.ucardfoto/{contentId}/content{?access_token}');
+        $uriTemplate = new UriTemplate('pl/rest/brm.pm.extension.ucardfoto/content/{contentId}{?%24format,%24ctx}');
         $uri = (string) $uriTemplate->expand([
             'contentId' => $card->contentId,
-            'access_token' => $this->token,
+            '%24format' => 'json',
+            '%24ctx' => 'lang=en',
         ]);
 
         $client = $this->getClient();
         try {
             $response = $client->get($uri);
         } catch (RequestException $e) {
-            throw new UCardException($e->getMessage());
+            throw $this->_getResponseError($e);
         }
 
-        return $this->parseGetContentResponse($response);
+        $pic = $this->parseGetContentResponse($response);
+
+        // just to be sure
+        if ($pic->id !== $card->contentId) {
+            throw new UCardException("Content ID of response didn't match");
+        }
+
+        return $pic;
+    }
+
+    /**
+     * @throws UCardException
+     *
+     * @return UCard[]
+     */
+    public function parseGetResponse(ResponseInterface $response): array
+    {
+        $content = (string) $response->getBody();
+        $json = CoreTools::decodeJSON($content, true);
+
+        $cards = [];
+        foreach ($json['resource'] as $res) {
+            $pic = $res['content']['plsqlCardPictureDto'];
+            $cardType = $pic['CARD_TYPE'];
+            $ident = $pic['IDENT_NR_OBFUSCATED'];
+            $contentId = (string) $pic['CONTENT_ID'];
+            $isUpdatable = $pic['IS_UPDATABLE'] === 'true';
+            $contentSize = $pic['CONTENT_SIZE'];
+            $cards[] = new UCard($ident, $cardType, $contentId, $contentSize, $isUpdatable);
+        }
+
+        return $cards;
     }
 
     public function parseGetContentResponse(ResponseInterface $response): UCardPicture
     {
         $content = (string) $response->getBody();
-        $xml = new \SimpleXMLElement($content);
+        file_put_contents('foo.json', $content);
+        $json = CoreTools::decodeJSON($content, true);
 
-        $pic = $xml->xpath('/codata:resources/resource/content/plsqlCardPicture');
-        if ($pic === false || count($pic) !== 1) {
-            throw new UCardException('missing content');
+        $pic = $json['resource'][0]['content']['plsqlCardPicture'];
+        $id = (string) $pic['ID'];
+        $uri = Uri::createFromString($pic['CONTENT']);
+        if ($uri->getScheme() !== 'data') {
+            throw new UCardException('invalid content scheme');
         }
-        $picArray = (array) $pic[0];
-
-        // TODO: more error handling
-        $id = $picArray['ID'];
-        $b64content = $picArray['CONTENT'];
-        $content = base64_decode($b64content, true);
+        $parts = explode(',', $uri->getPath(), 2);
+        if (count($parts) !== 2) {
+            throw new UCardException('Invalid content');
+        }
+        $content = base64_decode($parts[1], true);
         if ($content === false) {
             throw new UCardException('Invalid content');
         }
@@ -143,18 +212,81 @@ class UCardService
         return new UCardPicture($id, $content);
     }
 
-    public function createCardForIdent(string $ident, string $cardType): UCard
+    public function _getResponseError(RequestException $e): UCardException
     {
-        // POST https://<instanz/dad>/pl/rest/brm.pm.extension.ucardfoto?access_token=TOKEN$filter=IDENT_NR_OBFUSCATED-eq=054792FDE3956438
-        // CARD_TYPE = STA
-        // IDENT_NR_OBFUSCATED = 054792FDE3956438
+        $response = $e->getResponse();
+        if ($response === null) {
+            return new UCardException('Unknown error');
+        }
+        $data = (string) $e->getResponse()->getBody();
+        $json = CoreTools::decodeJSON($data, true);
+        if ($json['type'] ?? '' === 'resources') {
+            $coErrorDto = $json['resource'][0]['content']['coErrorDto'];
+            $message = $coErrorDto['errorType'].'['.$coErrorDto['httpCode'].']: '.$coErrorDto['message'];
 
-        return new UCard('', '', '', 0, false);
+            return new UCardException($message);
+        } else {
+            return new UCardException($json['type']);
+        }
     }
 
-    public function setCardPhoto(UCard $card, string $data)
+    /**
+     * @throws UCardException
+     */
+    public function createCardForIdent(string $ident, string $cardType): void
     {
-        // POST https://<instanz/dad>/pl/rest/brm.pm.extension.ucardfoto/${contentId}/content?access_token=TOKEN
-        // Content = base64
+        $uriTemplate = new UriTemplate('pl/rest/brm.pm.extension.ucardfoto{?%24format,%24ctx}');
+        $uri = (string) $uriTemplate->expand([
+            '%24format' => 'json',
+            '%24ctx' => 'lang=en',
+        ]);
+
+        $client = $this->getClient();
+        try {
+            $response = $client->post($uri, [
+                'form_params' => [
+                    'IDENT_NR_OBFUSCATED' => $ident,
+                    'CARD_TYPE' => $cardType,
+                ],
+            ]);
+        } catch (RequestException $e) {
+            throw $this->_getResponseError($e);
+        }
+
+        $content = (string) $response->getBody();
+        CoreTools::decodeJSON($content, true);
+    }
+
+    /**
+     * @throws UCardException
+     */
+    public function setCardPicture(UCard $card, string $data): void
+    {
+        $contentId = $card->contentId;
+
+        $uriTemplate = new UriTemplate('pl/rest/brm.pm.extension.ucardfoto/content/{contentId}{?%24format,%24ctx}');
+        $uri = (string) $uriTemplate->expand([
+            'contentId' => $contentId,
+            '%24format' => 'json',
+            '%24ctx' => 'lang=en',
+        ]);
+
+        $client = $this->getClient();
+        try {
+            $response = $client->post($uri, [
+                'multipart' => [
+                    [
+                        'name' => 'CONTENT',
+                        'contents' => $data,
+                        'filename' => 'filename.jpg',
+                    ],
+                ],
+            ]);
+        } catch (RequestException $e) {
+            throw $this->_getResponseError($e);
+        }
+
+        $content = (string) $response->getBody();
+        CoreTools::decodeJSON($content, true);
     }
 }

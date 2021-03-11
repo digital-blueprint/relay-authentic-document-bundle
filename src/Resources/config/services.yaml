@@ -29,6 +29,21 @@ services:
     autowire: true
     autoconfigure: true
 
+  DBP\API\AuthenticDocumentBundle\Command\PictureFetchCommand:
+    public: false
+    autowire: true
+    autoconfigure: true
+
+  DBP\API\AuthenticDocumentBundle\Command\PictureUploadCommand:
+    public: false
+    autowire: true
+    autoconfigure: true
+
+  DBP\API\AuthenticDocumentBundle\UCard\UCardService:
+    autowire: true
+    autoconfigure: true
+
+
   DBP\API\AuthenticDocumentBundle\Service\CampusOnlineApi:
     autowire: true
     autoconfigure: true
