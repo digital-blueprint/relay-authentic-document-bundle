@@ -4,16 +4,18 @@
     "license": "AGPL-3.0-or-later",
     "require": {
         "php": "^7.3",
+        "ext-json": "*",
+        "ext-simplexml": "*",
         "ext-soap": "*",
         "api-platform/core": "^2.5",
         "dbp/api-core-bundle": "dev-main",
         "guzzlehttp/guzzle": "^7.0",
+        "league/uri": "^6.4",
         "myclabs/php-enum": "^1.7",
         "symfony/framework-bundle": "^4.1.12",
         "symfony/mailer": "^v4.4.13",
         "symfony/messenger": "^4.4",
-        "ext-simplexml": "*",
-        "league/uri": "^6.4"
+        "symfony/polyfill-php80": "^1.22"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^2.16",
