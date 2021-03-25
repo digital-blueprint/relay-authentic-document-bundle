@@ -191,7 +191,6 @@ class UCardService
     public function parseGetContentResponse(ResponseInterface $response): UCardPicture
     {
         $content = (string) $response->getBody();
-        file_put_contents('foo.json', $content);
         $json = CoreTools::decodeJSON($content, true);
 
         $pic = $json['resource'][0]['content']['plsqlCardPicture'];
