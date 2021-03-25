@@ -471,26 +471,3 @@ class AuthenticDocumentApi
         return $authenticDocument;
     }
 }
-
-class TokenInformation
-{
-    /**
-     * @var \DateTime
-     */
-    public $birthDate;
-
-    /**
-     * @var string
-     */
-    public $givenName;
-
-    /**
-     * @var string
-     */
-    public $familyName;
-
-    /**
-     * @var string
-     */
-    public $subject;
-}
