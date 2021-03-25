@@ -8,9 +8,9 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
-use Symfony\Component\HttpKernel\DependencyInjection\Extension;
+use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
 
-class DbpAuthenticDocumentExtension extends Extension implements PrependExtensionInterface
+class DbpAuthenticDocumentExtension extends ConfigurableExtension implements PrependExtensionInterface
 {
     public function prepend(ContainerBuilder $container)
     {
@@ -25,7 +25,7 @@ class DbpAuthenticDocumentExtension extends Extension implements PrependExtensio
         );
     }
 
-    public function load(array $configs, ContainerBuilder $container)
+    public function loadInternal(array $mergedConfig, ContainerBuilder $container)
     {
         $this->extendArrayParameter($container, 'dbp_api.paths_to_hide', [
             '/authentic_documents',
@@ -42,6 +42,8 @@ class DbpAuthenticDocumentExtension extends Extension implements PrependExtensio
         );
 
         $loader->load('services.yaml');
+
+        $container->setParameter('dbp_api.authenticdocument.config', $mergedConfig);
     }
 
     private function extendArrayParameter(ContainerBuilder $container, string $parameter, array $values)

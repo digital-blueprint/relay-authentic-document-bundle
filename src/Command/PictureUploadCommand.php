@@ -9,9 +9,13 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\ContainerAwareInterface;
+use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 
-class PictureUploadCommand extends Command
+class PictureUploadCommand extends Command implements ContainerAwareInterface
 {
+    use ContainerAwareTrait;
+
     protected static $defaultName = 'dbp:picture-upload';
 
     private $service;
@@ -33,9 +37,11 @@ class PictureUploadCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $clientId = $_ENV['CO_OAUTH2_CLIENT_ID'];
-        $clientSecret = $_ENV['CO_OAUTH2_CLIENT_SECRET'];
-        $baseUrl = $_ENV['CO_OAUTH2_BASE_URL'];
+        $config = $this->container->getParameter('dbp_api.authenticdocument.config');
+        assert(is_array($config));
+        $clientId = $config['co_oauth2_api_client_id'] ?? '';
+        $clientSecret = $config['co_oauth2_api_client_secret'] ?? '';
+        $baseUrl = $config['co_oauth2_api_api_url'] ?? '';
 
         $service = $this->service;
         $service->setBaseUrl($baseUrl);

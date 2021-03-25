@@ -9,9 +9,13 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\ContainerAwareInterface;
+use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 
-class PictureFetchCommand extends Command
+class PictureFetchCommand extends Command implements ContainerAwareInterface
 {
+    use ContainerAwareTrait;
+
     protected static $defaultName = 'dbp:picture-fetch';
 
     private $service;
@@ -31,9 +35,11 @@ class PictureFetchCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $clientId = $_ENV['CO_OAUTH2_CLIENT_ID'];
-        $clientSecret = $_ENV['CO_OAUTH2_CLIENT_SECRET'];
-        $baseUrl = $_ENV['CO_OAUTH2_BASE_URL'];
+        $config = $this->container->getParameter('dbp_api.authenticdocument.config');
+        assert(is_array($config));
+        $clientId = $config['co_oauth2_api_client_id'] ?? '';
+        $clientSecret = $config['co_oauth2_api_client_secret'] ?? '';
+        $baseUrl = $config['co_oauth2_api_api_url'] ?? '';
 
         $service = $this->service;
         $service->setBaseUrl($baseUrl);
@@ -42,6 +48,11 @@ class PictureFetchCommand extends Command
 
         $ident = $input->getArgument('ident');
         $cards = $service->getCardsForIdent($ident);
+        if (count($cards) === 0) {
+            $output->writeln("No pictures found for '$ident'");
+
+            return 0;
+        }
         foreach ($cards as $card) {
             $pic = $service->getCardPicture($card);
             $filename = $card->ident.'-'.$card->cardType.'-'.$pic->id.'.jpg';
