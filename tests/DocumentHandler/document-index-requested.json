@@ -1,0 +1,9 @@
+{
+    "urn:eidgvat:attributes.user.photo": {
+        "urlsafe_attribute": "photo",
+        "availability_status": "requested",
+        "document_token": "foobar",
+        "expires": "2021-03-26T11:57:51.438+01:00",
+        "eta": "2021-03-25T16:10:00+01:00"
+    }
+}
