@@ -120,6 +120,9 @@ class DocumentHandler implements LoggerAwareInterface
         return $results;
     }
 
+    /**
+     * @throws DocumentHandlerException
+     */
     public function getDocumentContent(DocumentIndexEntry $entry, string $token): string
     {
         $uriTemplate = new UriTemplate('/documents/document/{attribute}');

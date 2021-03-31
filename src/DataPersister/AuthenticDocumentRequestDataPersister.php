@@ -47,10 +47,9 @@ final class AuthenticDocumentRequestDataPersister extends AbstractController imp
 
         // TODO: Is there a better identifier? (not that we would need one)
         $authenticDocumentRequest->setIdentifier($typeId.'-'.time());
-        $authenticDocumentRequest->setDateCreated(new \DateTime());
+        $authenticDocumentRequest->setDateCreated(new \DateTimeImmutable());
         $api = $this->api;
-        $authorizationHeader = $this->requestStack->getCurrentRequest()->headers->get('Authorization');
-        $message = $api->createAndDispatchAuthenticDocumentRequestMessage($authenticDocumentRequest, $authorizationHeader);
+        $message = $api->createAndDispatchAuthenticDocumentRequestMessage($authenticDocumentRequest);
 
         $authenticDocumentRequest->setEstimatedTimeOfArrival($message->getEstimatedResponseDate());
 

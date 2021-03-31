@@ -1,46 +1,35 @@
 <?php
 
 declare(strict_types=1);
-/**
- * Authentic Document API service.
- */
 
 namespace DBP\API\AuthenticDocumentBundle\Service;
 
+use DBP\API\AuthenticDocumentBundle\API\DocumentStorageInterface;
+use DBP\API\AuthenticDocumentBundle\DocumentHandler\AvailabilityStatus;
+use DBP\API\AuthenticDocumentBundle\DocumentHandler\DocumentHandler;
+use DBP\API\AuthenticDocumentBundle\DocumentHandler\DocumentIndexEntry;
 use DBP\API\AuthenticDocumentBundle\Entity\AuthenticDocument;
 use DBP\API\AuthenticDocumentBundle\Entity\AuthenticDocumentRequest;
 use DBP\API\AuthenticDocumentBundle\Entity\AuthenticDocumentType;
 use DBP\API\AuthenticDocumentBundle\Helpers\Tools;
 use DBP\API\AuthenticDocumentBundle\Message\AuthenticDocumentRequestMessage;
-use DBP\API\CoreBundle\Entity\Person;
-use DBP\API\CoreBundle\Exception\ApiError;
-use DBP\API\CoreBundle\Exception\ItemNotLoadedException;
-use DBP\API\CoreBundle\Helpers\GuzzleTools;
-use DBP\API\CoreBundle\Helpers\JsonException;
-use DBP\API\CoreBundle\Helpers\Tools as CoreTools;
 use DBP\API\CoreBundle\Service\PersonProviderInterface;
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\GuzzleException;
-use GuzzleHttp\Exception\RequestException;
-use GuzzleHttp\HandlerStack;
-use Psr\Http\Message\ResponseInterface;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
 
-class AuthenticDocumentApi
+class AuthenticDocumentApi implements LoggerAwareInterface
 {
+    use LoggerAwareTrait;
+
     /**
      * @var MessageBusInterface
      */
     private $bus;
-
-    private $clientHandler;
-
-    private $logger;
 
     /**
      * @var PersonProviderInterface
@@ -48,61 +37,46 @@ class AuthenticDocumentApi
     private $personProvider;
 
     /**
-     * @var AuthenticDocumentHandlerProviderInterface
+     * @var DocumentStorageInterface
      */
-    private $authenticDocumentHandlerProvider;
+    private $storage;
+
+    /**
+     * @var DocumentHandler
+     */
+    private $documentHandler;
 
     public function __construct(
         MessageBusInterface $bus,
         LoggerInterface $logger,
         PersonProviderInterface $personProvider,
-        AuthenticDocumentHandlerProviderInterface $authenticDocumentHandlerProvider
+        DocumentStorageInterface $storage,
+        DocumentHandler $documentHandler,
+        ContainerInterface $container
     ) {
         $this->bus = $bus;
-        $this->clientHandler = null;
         $this->logger = $logger;
         $this->personProvider = $personProvider;
-        $this->authenticDocumentHandlerProvider = $authenticDocumentHandlerProvider;
-    }
+        $this->storage = $storage;
+        $this->documentHandler = $documentHandler;
 
-    /**
-     * Replace the guzzle client handler for testing.
-     */
-    public function setClientHandler(?object $handler)
-    {
-        $this->clientHandler = $handler;
-    }
-
-    private function getClient(): Client
-    {
-        $stack = HandlerStack::create($this->clientHandler);
-
-        $client_options = [
-            'handler' => $stack,
-        ];
-
-        $stack->push(GuzzleTools::createLoggerMiddleware($this->logger));
-
-        return new Client($client_options);
+        $config = $container->getParameter('dbp_api.authenticdocument.config');
+        assert(is_array($config));
+        $documentHandler->setIDPUrl($config['dhandler_idp_url'] ?? '');
+        $documentHandler->setHandlerUrl($config['dhandler_api_url'] ?? '');
     }
 
     /**
      * Creates Symfony message and dispatch delayed message to download a document from egiz in the future.
-     *
-     * @return AuthenticDocumentRequestMessage
-     *
-     * @throws GuzzleException
-     * @throws ItemNotLoadedException
      */
     public function createAndDispatchAuthenticDocumentRequestMessage(
-        AuthenticDocumentRequest $authenticDocumentRequest, string $authorizationHeader)
+        AuthenticDocumentRequest $authenticDocumentRequest): AuthenticDocumentRequestMessage
     {
         $token = $authenticDocumentRequest->getToken();
         $typeId = $authenticDocumentRequest->getTypeId();
-        $authenticDocumentType = $this->getAuthenticDocumentType($typeId, ['token' => $token]);
-        $availabilityStatus = $authenticDocumentType->getAvailabilityStatus();
 
-        if ($availabilityStatus === 'not_available') {
+        $entry = $this->getDocumentIndexEntry($typeId, $token);
+        if ($entry === null || $entry->availabilityStatus === AvailabilityStatus::NOT_AVAILABLE) {
             throw new NotFoundHttpException('Document is not available');
         }
 
@@ -110,13 +84,13 @@ class AuthenticDocumentApi
         // note: it would also be possible to get the information from Keycloak directly but we don't want
         //       to be locked in into it and don't know if all data is available
         //       (https://auth-dev.tugraz.at/auth/realms/tugraz/broker/eid-oidc/token)
-        $tokenInformation = $this->fetchTokenInformation($token);
+        $tokenInformation = $this->documentHandler->getUserInfo($token);
         $givenName = $tokenInformation->givenName;
         $familyName = $tokenInformation->familyName;
         $birthDay = $tokenInformation->birthDate;
 
         // try to match name and birthday to a person
-        $people = $this->personProvider->getPersonsByNameAndBirthday($givenName, $familyName, $birthDay);
+        $people = $this->personProvider->getPersonsByNameAndBirthday($givenName, $familyName, new \DateTime($birthDay));
         $peopleCount = count($people);
 
         if ($peopleCount === 0) {
@@ -125,59 +99,70 @@ class AuthenticDocumentApi
             throw new NotFoundHttpException("Multiple people with name $givenName $familyName were found!");
         }
 
-        $estimatedTimeOfArrival = $authenticDocumentType->getEstimatedTimeOfArrival();
+        $person = $people[0];
+
+        // Before we queue anything we check if we can store it first
+        if (!$this->storage->canStoreDocument($person, $typeId)) {
+            throw new \Exception("Can't store");
+        }
+
         $dateCreated = $authenticDocumentRequest->getDateCreated();
-        $documentToken = $authenticDocumentType->getDocumentToken();
-
-        $message = new AuthenticDocumentRequestMessage($people[0], $documentToken, $typeId, $dateCreated, $estimatedTimeOfArrival);
-
-        $this->bus->dispatch(
+        $message = new AuthenticDocumentRequestMessage($person, $entry->documentToken, $typeId, $dateCreated, $entry->eta);
+        $envelope = $this->bus->dispatch(
             $message, [
-            $this->getDelayStampFromAuthenticDocumentType($authenticDocumentType),
+            $this->getDelayStampFromDocumentIndexEntry($entry),
         ]);
+
+        dump($envelope);
 
         return $message;
     }
 
-    /**
-     * @return mixed
-     *
-     * @throws ItemNotLoadedException
-     */
-    private function decodeResponse(ResponseInterface $response)
+    protected function getDocumentIndexEntry($id, $token): ?DocumentIndexEntry
     {
-        $body = $response->getBody();
-        try {
-            return CoreTools::decodeJSON((string) $body, true);
-        } catch (JsonException $e) {
-            throw new ItemNotLoadedException(sprintf('Invalid json: %s', CoreTools::filterErrorMessage($e->getMessage())));
+        $entries = $this->documentHandler->getDocumentIndex($token);
+        foreach ($entries as $key => $entry) {
+            $entryId = self::getTypeIdForKey($key);
+            if ($entryId !== null && $entryId === $id) {
+                return $entry;
+            }
         }
+
+        return null;
     }
 
     /**
-     * Handle Symfony Message AuthenticDocumentRequestMessage to download the document from the egiz server.
+     * Handle Symfony Message AuthenticDocumentRequestMessage to download the document and store it.
      */
     public function handleRequestMessage(AuthenticDocumentRequestMessage $message)
     {
         dump($message);
         $documentToken = $message->getDocumentToken();
         $typeId = $message->getTypeId();
-        $filters = ['token' => $documentToken];
-        // check if document is already available
-        $authenticDocumentType = $this->getAuthenticDocumentType($typeId, $filters);
 
-        switch ($authenticDocumentType->getAvailabilityStatus()) {
-            case 'available':
+        $entry = $this->getDocumentIndexEntry($typeId, $documentToken);
+
+        if ($entry === null) {
+            $this->storage->storeDocumentError(
+                $message->getPerson(),
+                $message->getRequestCreatedDate(),
+                $typeId,
+                'entry not found');
+
+            return;
+        }
+
+        switch ($entry->availabilityStatus) {
+            case AvailabilityStatus::AVAILABLE:
                 try {
-                    $data = $this->fetchAuthenticDocumentData($typeId, $filters);
-
-                    $this->authenticDocumentHandlerProvider->persistAuthenticDocument(
+                    $data = $this->getAuthenticDocumentData($typeId, $documentToken);
+                    $this->storage->storeDocument(
                         $message->getPerson(),
                         $message->getRequestCreatedDate(),
                         $typeId,
                         $data);
                 } catch (\Exception $e) {
-                    $this->authenticDocumentHandlerProvider->handleAuthenticDocumentFetchException(
+                    $this->storage->storeDocumentError(
                         $message->getPerson(),
                         $message->getRequestCreatedDate(),
                         $typeId,
@@ -185,19 +170,19 @@ class AuthenticDocumentApi
                 }
 
                 break;
-            case 'requested':
+            case AvailabilityStatus::REQUESTED:
                 // if document is not yet available dispatch a new delayed message
                 $newMessage = clone $message;
                 $newMessage->incRetry();
-                $newMessage->setEstimatedResponseDate($authenticDocumentType->getEstimatedTimeOfArrival());
+                $newMessage->setEstimatedResponseDate($entry->eta);
 
-                // wait at least 30 sec
+                // wait at least 60 sec
                 $this->bus->dispatch($newMessage, [
-                    $this->getDelayStampFromAuthenticDocumentType($authenticDocumentType, 30),
+                    $this->getDelayStampFromDocumentIndexEntry($entry, 60),
                 ]);
                 break;
             default:
-                $this->authenticDocumentHandlerProvider->handleAuthenticDocumentNotAvailable(
+                $this->storage->storeDocumentNotAvailable(
                     $message->getPerson(),
                     $message->getRequestCreatedDate(),
                     $typeId);
@@ -206,58 +191,11 @@ class AuthenticDocumentApi
     }
 
     /**
-     * @throws HttpException
-     */
-    public function fetchTokenInformation($token): TokenInformation
-    {
-        // TODO: Do we need a setting for this url?
-        $url = 'https://eid.egiz.gv.at/idp_p/profile/oidc/userinfo';
-
-        $client = $this->getClient();
-
-        $options = [
-            'headers' => [
-                'Authorization' => 'Bearer '.$token,
-            ],
-        ];
-
-        try {
-            // http://docs.guzzlephp.org/en/stable/quickstart.html?highlight=get#making-a-request
-            $response = $client->request('GET', $url, $options);
-
-            //  Returns:
-            //  [
-            //    ...
-            //    "birthdate" => "1994-12-31"
-            //    "given_name" => "XXXClaus - Maria"
-            //    "family_name" => "XXXvon Brandenburg"
-            // ]
-            $data = $this->decodeResponse($response);
-
-            $tokenInformation = new TokenInformation();
-            $tokenInformation->birthDate = new \DateTime($data['birthdate'] ?? '');
-            $tokenInformation->givenName = $data['given_name'] ?? '';
-            $tokenInformation->familyName = $data['family_name'] ?? '';
-            $tokenInformation->subject = $data['sub'];
-
-            return $tokenInformation;
-        } catch (RequestException $e) {
-            if ($e->getResponse() !== null && $e->getResponse()->getStatusCode() === Response::HTTP_BAD_REQUEST) {
-                throw new ApiError(Response::HTTP_FORBIDDEN, 'Token invalid');
-            } else {
-                throw new HttpException(Response::HTTP_INTERNAL_SERVER_ERROR, sprintf('Token information could not be loaded! Message: %s', $e->getMessage()));
-            }
-        }
-    }
-
-    /**
      * @param int $minDelayTime [sec]
      */
-    public function getDelayStampFromAuthenticDocumentType($authenticDocumentType, $minDelayTime = 0): DelayStamp
+    protected function getDelayStampFromDocumentIndexEntry(DocumentIndexEntry $entry, int $minDelayTime = 0): DelayStamp
     {
-        $estimatedTimeOfArrival = $authenticDocumentType->getEstimatedTimeOfArrival();
-        $seconds = $estimatedTimeOfArrival->getTimestamp() - time();
-
+        $seconds = $entry->eta->getTimestamp() - time();
         if ($seconds < $minDelayTime) {
             $seconds = $minDelayTime;
         }
@@ -267,102 +205,56 @@ class AuthenticDocumentApi
 
     /**
      * @return AuthenticDocumentType[]
-     *
-     * @throws ItemNotLoadedException
      */
-    public function getAuthenticDocumentTypes(array $filters): array
+    public function getAuthenticDocumentTypes(string $token): array
     {
+        $entries = $this->documentHandler->getDocumentIndex($token);
         $collection = [];
-        $authenticDocumentTypesJsonData = $this->getAuthenticDocumentTypesJsonData($filters);
-        foreach ($authenticDocumentTypesJsonData as $key => $jsonData) {
-            $collection[] = $this->authenticDocumentTypeFromJsonItem($key, $jsonData);
+        foreach ($entries as $key => $entry) {
+            $id = self::getTypeIdForKey($key);
+            if ($id !== null) {
+                $name = self::getTypeNameForKey($key);
+                assert($name !== null);
+                $collection[] = $this->authenticDocumentTypeFromIndexEntry($id, $name, $entry);
+            }
         }
 
         return $collection;
     }
 
-    public function getAuthenticDocumentType($id, array $filters): AuthenticDocumentType
+    public function getAuthenticDocumentType(string $id, string $token): AuthenticDocumentType
     {
-        try {
-            $authenticDocumentTypes = $this->getAuthenticDocumentTypes($filters);
-        } catch (ItemNotLoadedException $e) {
-            throw new NotFoundHttpException('AuthenticDocumentType was not found!');
-        }
+        $entries = $this->documentHandler->getDocumentIndex($token);
+        foreach ($entries as $key => $entry) {
+            $entryId = self::getTypeIdForKey($key);
+            if ($entryId !== null && $entryId === $id) {
+                $name = self::getTypeNameForKey($key);
+                assert($name !== null);
 
-        foreach ($authenticDocumentTypes as $authenticDocumentType) {
-            if ($authenticDocumentType->getIdentifier() === $id) {
-                return $authenticDocumentType;
+                return $this->authenticDocumentTypeFromIndexEntry($id, $name, $entry);
             }
         }
-
         throw new NotFoundHttpException('AuthenticDocumentType was not found!');
     }
 
-    public function getAuthenticDocumentTypesJsonData($filters): array
-    {
-        $token = $filters['token'] ?? '';
-
-        if ($token === '') {
-            return [];
-        }
-
-        $tokenInfo = $this->fetchTokenInformation($token);
-        // This is a dummy test user
-        if ($tokenInfo->subject === 'BF:s7BoRnRfJjQsENddRnbT48TO15E=') {
-            $token = 'photo-jpeg-available-token';
-        }
-
-        // TODO: Do we need a setting for this url?
-        $url = 'https://eid.egiz.gv.at/documentHandler_p/documents/document/';
-
-        $client = $this->getClient();
-
-        $options = [
-            'headers' => [
-                'Authorization' => 'Bearer '.$token,
-            ],
-        ];
-
-        try {
-            // http://docs.guzzlephp.org/en/stable/quickstart.html?highlight=get#making-a-request
-            $response = $client->request('GET', $url, $options);
-
-            return $this->decodeResponse($response);
-        } catch (\Exception $e) {
-            throw new ItemNotLoadedException(sprintf('Document Types could not be loaded! Message: %s', $e->getMessage()));
-        }
-    }
-
-    public function authenticDocumentTypeFromJsonItem(string $key, array $item): AuthenticDocumentType
+    protected function authenticDocumentTypeFromIndexEntry(string $id, string $name, DocumentIndexEntry $entry): AuthenticDocumentType
     {
         $authenticDocumentType = new AuthenticDocumentType();
-        $availabilityStatus = $item['availability_status'];
-        $estimatedTimeOfArrival = isset($item['eta']) ? new \DateTime($item['eta']) : null;
-        if ($availabilityStatus === 'available') {
-            $estimatedTimeOfArrival = new \DateTime();
-        }
-
         // we must not set the urlsafe_attribute directly as identifier because not all characters are allowed there
         // "." is not allowed by ApiPlatform
         // "/" is not allowed by Symfony
-//        $authenticDocumentType->setIdentifier(urlencode(base64_encode($item['urlsafe_attribute'])));
-        $authenticDocumentType->setIdentifier(self::getAuthenticDocumentTypeKeyIdentifierMapping($key));
-        $authenticDocumentType->setName(self::getAuthenticDocumentTypeKeyNameMapping($key));
-        $authenticDocumentType->setUrlSafeAttribute($item['urlsafe_attribute']);
-        $authenticDocumentType->setAvailabilityStatus($availabilityStatus);
-        $authenticDocumentType->setDocumentToken($item['document_token'] ?? null);
-        $authenticDocumentType->setExpiryDate(isset($item['expires']) ? new \DateTime($item['expires']) : null);
-        $authenticDocumentType->setEstimatedTimeOfArrival($estimatedTimeOfArrival);
+        $authenticDocumentType->setIdentifier($id);
+        $authenticDocumentType->setName($name);
+        $authenticDocumentType->setUrlSafeAttribute($entry->urlsafeAttribute);
+        $authenticDocumentType->setAvailabilityStatus($entry->availabilityStatus);
+        $authenticDocumentType->setDocumentToken($entry->documentToken);
+        $authenticDocumentType->setExpiryDate($entry->expires);
+        $authenticDocumentType->setEstimatedTimeOfArrival($entry->eta);
 
         return $authenticDocumentType;
     }
 
-    /**
-     * @param string|null $key
-     *
-     * @return array|string
-     */
-    public static function getAuthenticDocumentTypeKeyNameMapping($key = null)
+    protected static function getTypeNameForKey(string $key): ?string
     {
         $mapping = [
             'urn:eidgvat:attributes.user.photo-jpeg-requested' => 'Foto',
@@ -372,15 +264,10 @@ class AuthenticDocumentApi
             'urn:eidgvat:attributes.user.photo' => 'Foto',
         ];
 
-        return ($key === null) ? $mapping : ($mapping[$key] ?? '');
+        return $mapping[$key] ?? null;
     }
 
-    /**
-     * @param string|null $key
-     *
-     * @return array|string
-     */
-    public static function getAuthenticDocumentTypeKeyIdentifierMapping($key = null)
+    protected static function getTypeIdForKey(string $key): ?string
     {
         $mapping = [
             'urn:eidgvat:attributes.user.photo-jpeg-requested' => 'dummy-photo-jpeg-requested',
@@ -390,75 +277,27 @@ class AuthenticDocumentApi
             'urn:eidgvat:attributes.user.photo' => 'photo',
         ];
 
-        return ($key === null) ? $mapping : ($mapping[$key] ?? '');
+        return $mapping[$key] ?? null;
     }
 
-    /**
-     * @param string|null $id
-     *
-     * @return array|string
-     */
-    public static function getAuthenticDocumentTypeIdentifierKeyMapping($id = null)
+    protected function getAuthenticDocumentData(string $id, string $token): string
     {
-        $mapping = array_flip(self::getAuthenticDocumentTypeKeyIdentifierMapping());
+        $entry = $this->getDocumentIndexEntry($id, $token);
 
-        return ($id === null) ? $mapping : ($mapping[$id] ?? '');
-    }
-
-    public function fetchAuthenticDocumentData($id, $filters): string
-    {
-        if ($id === '') {
-            throw new NotFoundHttpException('No id was set');
+        if ($entry === null) {
+            throw new NotFoundHttpException('id no found');
         }
 
-        $authenticDocumentType = $this->getAuthenticDocumentType($id, $filters);
-
-        switch ($authenticDocumentType->getAvailabilityStatus()) {
-            case 'available':
-                $urlAttribute = $authenticDocumentType->getUrlSafeAttribute();
-                $documentToken = $authenticDocumentType->getDocumentToken();
-
-                // TODO: Do we need a setting for this url?
-                $url = "https://eid.egiz.gv.at/documentHandler_p/documents/document/$urlAttribute";
-
-                $client = $this->getClient();
-                $options = [
-                    'headers' => [
-                        'Authorization' => 'Bearer '.$documentToken,
-                    ],
-                ];
-
-                try {
-                    // http://docs.guzzlephp.org/en/stable/quickstart.html?highlight=get#making-a-request
-                    $response = $client->request('GET', $url, $options);
-
-                    return $response->getBody()->getContents();
-                } catch (RequestException $e) {
-                    $response = $e->getResponse();
-                    $body = $response->getBody();
-                    $message = $body->getContents();
-
-                    throw new ItemNotLoadedException(sprintf('Document could not be loaded! Message: %s', $message));
-                } catch (ItemNotLoadedException $e) {
-                    throw new ItemNotLoadedException(sprintf('Document could not be loaded! Message: %s', $e->getMessage()));
-                } catch (GuzzleException $e) {
-                    throw new ItemNotLoadedException(sprintf('Document could not be loaded! Message: %s', $e->getMessage()));
-                }
-            case 'requested':
-                throw new NotFoundHttpException('AuthenticDocument is not yet available!');
-            case 'not_available':
-                throw new NotFoundHttpException('AuthenticDocument is not available!');
-            default:
-                throw new NotFoundHttpException('AuthenticDocument was not found!');
+        if ($entry->availabilityStatus !== AvailabilityStatus::AVAILABLE) {
+            throw new NotFoundHttpException('not available');
         }
+
+        return $this->documentHandler->getDocumentContent($entry, $token);
     }
 
-    /**
-     * @throws ItemNotLoadedException
-     */
-    public function getAuthenticDocument($id, $filters): AuthenticDocument
+    public function getAuthenticDocument(string $id, string $token): AuthenticDocument
     {
-        $data = $this->fetchAuthenticDocumentData($id, $filters);
+        $data = $this->getAuthenticDocumentData($id, $token);
         $mimeType = Tools::getMimeType($data);
         $fileExtension = Tools::getFileExtensionForMimeType($mimeType);
 

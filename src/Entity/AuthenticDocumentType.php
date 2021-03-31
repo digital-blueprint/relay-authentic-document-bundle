@@ -88,14 +88,14 @@ class AuthenticDocumentType
     /**
      * @Groups({"AuthenticDocumentType:output"})
      *
-     * @var \DateTime|null
+     * @var \DateTimeInterface|null
      */
     private $expiryDate;
 
     /**
      * @Groups({"AuthenticDocumentType:output"})
      *
-     * @var \DateTime|null
+     * @var \DateTimeInterface|null
      */
     private $estimatedTimeOfArrival;
 
@@ -184,19 +184,19 @@ class AuthenticDocumentType
     }
 
     /**
-     * @return ?\DateTime
+     * @return ?\DateTimeInterface
      */
-    public function getExpiryDate(): ?\DateTime
+    public function getExpiryDate(): ?\DateTimeInterface
     {
         return $this->expiryDate;
     }
 
     /**
-     * @param ?\DateTime $expiryDate
+     * @param ?\DateTimeInterface $expiryDate
      *
      * @return AuthenticDocumentType
      */
-    public function setExpiryDate(?\DateTime $expiryDate): self
+    public function setExpiryDate(?\DateTimeInterface $expiryDate): self
     {
         $this->expiryDate = $expiryDate;
 
@@ -204,19 +204,19 @@ class AuthenticDocumentType
     }
 
     /**
-     * @return ?\DateTime
+     * @return ?\DateTimeInterface
      */
-    public function getEstimatedTimeOfArrival(): ?\DateTime
+    public function getEstimatedTimeOfArrival(): ?\DateTimeInterface
     {
         return $this->estimatedTimeOfArrival;
     }
 
     /**
-     * @param ?\DateTime $estimatedTimeOfArrival
+     * @param ?\DateTimeInterface $estimatedTimeOfArrival
      *
      * @return AuthenticDocumentType
      */
-    public function setEstimatedTimeOfArrival(?\DateTime $estimatedTimeOfArrival): self
+    public function setEstimatedTimeOfArrival(?\DateTimeInterface $estimatedTimeOfArrival): self
     {
         $this->estimatedTimeOfArrival = $estimatedTimeOfArrival;
 

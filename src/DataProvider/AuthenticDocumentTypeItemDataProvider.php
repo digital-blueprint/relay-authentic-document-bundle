@@ -10,6 +10,7 @@ use DBP\API\AuthenticDocumentBundle\Entity\AuthenticDocumentType;
 use DBP\API\AuthenticDocumentBundle\Service\AuthenticDocumentApi;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 final class AuthenticDocumentTypeItemDataProvider extends AbstractController implements ItemDataProviderInterface, RestrictedDataProviderInterface
 {
@@ -35,11 +36,12 @@ final class AuthenticDocumentTypeItemDataProvider extends AbstractController imp
         $api = $this->api;
         $filters = $context['filters'] ?? [];
 
-        // get the token as header variable if not set
-        if (!isset($filters['token'])) {
-            $filters['token'] = $this->requestStack->getCurrentRequest()->headers->get('token');
+        $token = $filters['token'] ?? $this->requestStack->getCurrentRequest()->headers->get('token');
+        if ($token === null) {
+            throw new BadRequestHttpException("Missing 'token' parameter or header");
         }
+        assert($token !== null);
 
-        return $api->getAuthenticDocumentType($id, $filters);
+        return $api->getAuthenticDocumentType($id, $token);
     }
 }

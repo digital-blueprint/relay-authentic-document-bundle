@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace DBP\API\AuthenticDocumentBundle\Helpers;
 
+use Symfony\Component\Mime\MimeTypes;
+
 class Tools
 {
     /**
@@ -23,24 +25,9 @@ class Tools
 
     public static function getFileExtensionForMimeType(string $mimeType): string
     {
-        $extensions = [
-            'application/pdf' => 'pdf',
-            'image/jpeg' => 'jpg',
-            'image/png' => 'png',
-            'text/xml' => 'xml',
-        ];
+        $mimeTypes = new MimeTypes();
+        $extensions = $mimeTypes->getExtensions($mimeType);
 
-        return $extensions[$mimeType] ?? 'dump';
-    }
-
-    public static function endsWith($haystack, $needle)
-    {
-        $length = strlen($needle);
-
-        if (!$length) {
-            return true;
-        }
-
-        return substr($haystack, -$length) === $needle;
+        return $extensions[0] ?? 'dump';
     }
 }

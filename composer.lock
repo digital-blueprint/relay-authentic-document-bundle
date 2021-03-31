@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cab734b923b9ad82fe480bc6798427fb",
+    "content-hash": "e2796fb3333d17884f668b9fef53ec7d",
     "packages": [
         {
             "name": "api-platform/core",
@@ -226,7 +226,7 @@
             "source": {
                 "type": "git",
                 "url": "git@gitlab.tugraz.at:dbp/middleware/dbp-api/api-core-bundle.git",
-                "reference": "5d4b90bd60efc9cc60bf4eb36e2fceb3762c709c"
+                "reference": "ef226462b10b35dc4c0fc1b085a894eb2774a488"
             },
             "require": {
                 "api-platform/core": "^2.6.3",
@@ -302,7 +302,7 @@
             "license": [
                 "AGPL-3.0-or-later"
             ],
-            "time": "2021-05-04T09:38:40+00:00"
+            "time": "2021-05-10T09:05:07+00:00"
         },
         {
             "name": "doctrine/annotations",
@@ -7667,21 +7667,21 @@
         },
         {
             "name": "phpstan/phpstan-phpunit",
-            "version": "0.12.18",
+            "version": "0.12.19",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan-phpunit.git",
-                "reference": "ab44aec7cfb5cb267b8bc30a8caea86dd50d1f72"
+                "reference": "52f7072ddc5f81492f9d2de65a24813a48c90b18"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan-phpunit/zipball/ab44aec7cfb5cb267b8bc30a8caea86dd50d1f72",
-                "reference": "ab44aec7cfb5cb267b8bc30a8caea86dd50d1f72",
+                "url": "https://api.github.com/repos/phpstan/phpstan-phpunit/zipball/52f7072ddc5f81492f9d2de65a24813a48c90b18",
+                "reference": "52f7072ddc5f81492f9d2de65a24813a48c90b18",
                 "shasum": ""
             },
             "require": {
                 "php": "^7.1 || ^8.0",
-                "phpstan/phpstan": "^0.12.60"
+                "phpstan/phpstan": "^0.12.86"
             },
             "conflict": {
                 "phpunit/phpunit": "<7.0"
@@ -7716,9 +7716,9 @@
             "description": "PHPUnit extensions and rules for PHPStan",
             "support": {
                 "issues": "https://github.com/phpstan/phpstan-phpunit/issues",
-                "source": "https://github.com/phpstan/phpstan-phpunit/tree/0.12.18"
+                "source": "https://github.com/phpstan/phpstan-phpunit/tree/0.12.19"
             },
-            "time": "2021-03-06T11:51:27+00:00"
+            "time": "2021-04-30T11:10:37+00:00"
         },
         {
             "name": "sebastian/diff",
@@ -8555,6 +8555,7 @@
     "prefer-lowest": false,
     "platform": {
         "php": "^7.3",
+        "ext-fileinfo": "*",
         "ext-json": "*",
         "ext-simplexml": "*",
         "ext-soap": "*"
