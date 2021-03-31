@@ -1,0 +1,8 @@
+{
+    "sub": "BF:foobar",
+    "birthdate": "1970-01-01",
+    "urn:pvpgvat:oidc.pvp_version": "2.1",
+    "urn:pvpgvat:oidc.bpk": "BF:foobar",
+    "given_name": "Given",
+    "family_name": "Family"
+}
