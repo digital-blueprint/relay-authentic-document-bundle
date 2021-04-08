@@ -245,10 +245,7 @@ class AuthenticDocumentApi implements LoggerAwareInterface
         // "/" is not allowed by Symfony
         $authenticDocumentType->setIdentifier($id);
         $authenticDocumentType->setName($name);
-        $authenticDocumentType->setUrlSafeAttribute($entry->urlsafeAttribute);
         $authenticDocumentType->setAvailabilityStatus($entry->availabilityStatus);
-        $authenticDocumentType->setDocumentToken($entry->documentToken);
-        $authenticDocumentType->setExpiryDate($entry->expires);
         $authenticDocumentType->setEstimatedTimeOfArrival($entry->eta);
 
         return $authenticDocumentType;

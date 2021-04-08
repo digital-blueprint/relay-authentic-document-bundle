@@ -66,31 +66,11 @@ class AuthenticDocumentType
     private $name;
 
     /**
-     * @ApiProperty(iri="http://schema.org/name")
-     * @Groups({"AuthenticDocumentType:output"})
-     *
-     * @var string|null
-     */
-    private $urlSafeAttribute;
-
-    /**
      * @Groups({"AuthenticDocumentType:output"})
      *
      * @var string|null
      */
     private $availabilityStatus;
-
-    /**
-     * @var string|null
-     */
-    private $documentToken;
-
-    /**
-     * @Groups({"AuthenticDocumentType:output"})
-     *
-     * @var \DateTimeInterface|null
-     */
-    private $expiryDate;
 
     /**
      * @Groups({"AuthenticDocumentType:output"})
@@ -131,18 +111,6 @@ class AuthenticDocumentType
         return $this;
     }
 
-    public function getUrlSafeAttribute(): ?string
-    {
-        return $this->urlSafeAttribute;
-    }
-
-    public function setUrlSafeAttribute(?string $urlSafeAttribute): self
-    {
-        $this->urlSafeAttribute = $urlSafeAttribute;
-
-        return $this;
-    }
-
     /**
      * @return string
      */
@@ -159,46 +127,6 @@ class AuthenticDocumentType
     public function setAvailabilityStatus(?string $availabilityStatus): self
     {
         $this->availabilityStatus = $availabilityStatus;
-
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getDocumentToken(): ?string
-    {
-        return $this->documentToken;
-    }
-
-    /**
-     * @param ?string $documentToken
-     *
-     * @return AuthenticDocumentType
-     */
-    public function setDocumentToken(?string $documentToken): self
-    {
-        $this->documentToken = $documentToken;
-
-        return $this;
-    }
-
-    /**
-     * @return ?\DateTimeInterface
-     */
-    public function getExpiryDate(): ?\DateTimeInterface
-    {
-        return $this->expiryDate;
-    }
-
-    /**
-     * @param ?\DateTimeInterface $expiryDate
-     *
-     * @return AuthenticDocumentType
-     */
-    public function setExpiryDate(?\DateTimeInterface $expiryDate): self
-    {
-        $this->expiryDate = $expiryDate;
 
         return $this;
     }
