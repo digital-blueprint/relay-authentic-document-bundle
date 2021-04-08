@@ -70,9 +70,8 @@ class AuthenticDocumentApi implements LoggerAwareInterface
      * Creates Symfony message and dispatch delayed message to download a document from egiz in the future.
      */
     public function createAndDispatchAuthenticDocumentRequestMessage(
-        AuthenticDocumentRequest $authenticDocumentRequest): AuthenticDocumentRequestMessage
+        AuthenticDocumentRequest $authenticDocumentRequest, string $token): AuthenticDocumentRequestMessage
     {
-        $token = $authenticDocumentRequest->getToken();
         $typeId = $authenticDocumentRequest->getTypeId();
 
         $entry = $this->getDocumentIndexEntry($typeId, $token);

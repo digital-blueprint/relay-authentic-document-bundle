@@ -54,22 +54,6 @@ class AuthenticDocumentRequest
     private $identifier;
 
     /**
-     * @ApiProperty(iri="http://schema.org/name")
-     * @Groups({"AuthenticDocumentRequest:output", "AuthenticDocumentRequest:input"})
-     * @ApiProperty(
-     *     attributes={
-     *         "openapi_context" = {
-     *             "type" = "string",
-     *             "example" = "photo-jpeg-available-token"
-     *         }
-     *     }
-     * )
-     *
-     * @var string
-     */
-    private $token;
-
-    /**
      * @ApiProperty(iri="http://schema.org/Text")
      * @Groups({"AuthenticDocumentRequest:output", "AuthenticDocumentRequest:input"})
      *
@@ -100,16 +84,6 @@ class AuthenticDocumentRequest
     public function getIdentifier(): ?string
     {
         return $this->identifier;
-    }
-
-    public function getToken(): ?string
-    {
-        return $this->token;
-    }
-
-    public function setToken(string $token): void
-    {
-        $this->token = $token;
     }
 
     public function getTypeId(): ?string
