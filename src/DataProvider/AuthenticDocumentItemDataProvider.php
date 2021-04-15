@@ -29,8 +29,6 @@ final class AuthenticDocumentItemDataProvider extends AbstractController impleme
     }
 
     /**
-     * @param array|int|string $id
-     *
      * @throws \DBP\API\CoreBundle\Exception\ItemNotLoadedException
      */
     public function getItem(string $resourceClass, $id, string $operationName = null, array $context = []): ?AuthenticDocument

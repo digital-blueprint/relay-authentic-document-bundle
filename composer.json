@@ -7,7 +7,7 @@
         "ext-json": "*",
         "ext-simplexml": "*",
         "ext-soap": "*",
-        "api-platform/core": "^2.5",
+        "api-platform/core": "^2.6",
         "dbp/api-core-bundle": "dev-main",
         "guzzlehttp/guzzle": "^7.0",
         "league/uri": "^6.4",

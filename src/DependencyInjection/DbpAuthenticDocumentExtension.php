@@ -30,7 +30,7 @@ class DbpAuthenticDocumentExtension extends ConfigurableExtension implements Pre
         $this->extendArrayParameter($container, 'dbp_api.paths_to_hide', [
             '/authentic_documents',
             '/authentic_document_requests',
-            '/authentic_document_requests/{id}',
+            '/authentic_document_requests/{identifier}',
         ]);
 
         $this->extendArrayParameter(
