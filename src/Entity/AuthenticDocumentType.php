@@ -66,14 +66,6 @@ class AuthenticDocumentType
     private $name;
 
     /**
-     * @ApiProperty(iri="http://schema.org/name")
-     * @Groups({"AuthenticDocumentType:output"})
-     *
-     * @var string|null
-     */
-    private $urlSafeAttribute;
-
-    /**
      * @Groups({"AuthenticDocumentType:output"})
      *
      * @var string|null
@@ -81,21 +73,9 @@ class AuthenticDocumentType
     private $availabilityStatus;
 
     /**
-     * @var string|null
-     */
-    private $documentToken;
-
-    /**
      * @Groups({"AuthenticDocumentType:output"})
      *
-     * @var \DateTime|null
-     */
-    private $expiryDate;
-
-    /**
-     * @Groups({"AuthenticDocumentType:output"})
-     *
-     * @var \DateTime|null
+     * @var \DateTimeInterface|null
      */
     private $estimatedTimeOfArrival;
 
@@ -131,18 +111,6 @@ class AuthenticDocumentType
         return $this;
     }
 
-    public function getUrlSafeAttribute(): ?string
-    {
-        return $this->urlSafeAttribute;
-    }
-
-    public function setUrlSafeAttribute(?string $urlSafeAttribute): self
-    {
-        $this->urlSafeAttribute = $urlSafeAttribute;
-
-        return $this;
-    }
-
     /**
      * @return string
      */
@@ -164,59 +132,19 @@ class AuthenticDocumentType
     }
 
     /**
-     * @return string
+     * @return ?\DateTimeInterface
      */
-    public function getDocumentToken(): ?string
-    {
-        return $this->documentToken;
-    }
-
-    /**
-     * @param ?string $documentToken
-     *
-     * @return AuthenticDocumentType
-     */
-    public function setDocumentToken(?string $documentToken): self
-    {
-        $this->documentToken = $documentToken;
-
-        return $this;
-    }
-
-    /**
-     * @return ?\DateTime
-     */
-    public function getExpiryDate(): ?\DateTime
-    {
-        return $this->expiryDate;
-    }
-
-    /**
-     * @param ?\DateTime $expiryDate
-     *
-     * @return AuthenticDocumentType
-     */
-    public function setExpiryDate(?\DateTime $expiryDate): self
-    {
-        $this->expiryDate = $expiryDate;
-
-        return $this;
-    }
-
-    /**
-     * @return ?\DateTime
-     */
-    public function getEstimatedTimeOfArrival(): ?\DateTime
+    public function getEstimatedTimeOfArrival(): ?\DateTimeInterface
     {
         return $this->estimatedTimeOfArrival;
     }
 
     /**
-     * @param ?\DateTime $estimatedTimeOfArrival
+     * @param ?\DateTimeInterface $estimatedTimeOfArrival
      *
      * @return AuthenticDocumentType
      */
-    public function setEstimatedTimeOfArrival(?\DateTime $estimatedTimeOfArrival): self
+    public function setEstimatedTimeOfArrival(?\DateTimeInterface $estimatedTimeOfArrival): self
     {
         $this->estimatedTimeOfArrival = $estimatedTimeOfArrival;
 

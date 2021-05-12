@@ -12,10 +12,13 @@ use GuzzleHttp\HandlerStack;
 use League\Uri\Uri;
 use League\Uri\UriTemplate;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Log\LoggerInterface;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
 
-class UCardService
+class UCardAPI implements LoggerAwareInterface
 {
+    use LoggerAwareTrait;
+
     /**
      * @var ?string
      */
@@ -25,12 +28,10 @@ class UCardService
      */
     private $baseUrl;
     private $clientHandler;
-    private $logger;
 
-    public function __construct(LoggerInterface $logger)
+    public function __construct()
     {
         $this->token = null;
-        $this->logger = $logger;
         $this->baseUrl = null;
     }
 
@@ -39,22 +40,39 @@ class UCardService
         $this->baseUrl = $url;
     }
 
-    public function fetchToken(string $clientId, string $clientSecret): array
+    /**
+     * @throws UCardException
+     */
+    public function fetchToken(string $clientId, string $clientSecret): void
     {
         if ($this->baseUrl === null) {
             throw new \ValueError('baseUrl is not set');
         }
-        $client = new Client();
-        $response = $client->post($this->baseUrl.'/wbOAuth2.token', [
-            'form_params' => [
-                'client_id' => $clientId,
-                'client_secret' => $clientSecret,
-                'grant_type' => 'client_credentials',
-            ],
-        ]);
+
+        $stack = HandlerStack::create($this->clientHandler);
+        $client_options = [
+            'handler' => $stack,
+        ];
+        if ($this->logger !== null) {
+            $stack->push(GuzzleTools::createLoggerMiddleware($this->logger));
+        }
+        $client = new Client($client_options);
+
+        try {
+            $response = $client->post($this->baseUrl.'/wbOAuth2.token', [
+                'form_params' => [
+                    'client_id' => $clientId,
+                    'client_secret' => $clientSecret,
+                    'grant_type' => 'client_credentials',
+                ],
+            ]);
+        } catch (RequestException $e) {
+            throw new UCardException($e->getMessage());
+        }
         $data = $response->getBody()->getContents();
 
-        return CoreTools::decodeJSON($data, true);
+        $token = CoreTools::decodeJSON($data, true);
+        $this->setToken($token['access_token']);
     }
 
     public function setToken(string $token): void
@@ -90,7 +108,9 @@ class UCardService
             ],
         ];
 
-        $stack->push(GuzzleTools::createLoggerMiddleware($this->logger));
+        if ($this->logger !== null) {
+            $stack->push(GuzzleTools::createLoggerMiddleware($this->logger));
+        }
 
         $client = new Client($client_options);
 

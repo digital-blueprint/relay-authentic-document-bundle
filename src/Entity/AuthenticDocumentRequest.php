@@ -54,22 +54,6 @@ class AuthenticDocumentRequest
     private $identifier;
 
     /**
-     * @ApiProperty(iri="http://schema.org/name")
-     * @Groups({"AuthenticDocumentRequest:output", "AuthenticDocumentRequest:input"})
-     * @ApiProperty(
-     *     attributes={
-     *         "openapi_context" = {
-     *             "type" = "string",
-     *             "example" = "photo-jpeg-available-token"
-     *         }
-     *     }
-     * )
-     *
-     * @var string
-     */
-    private $token;
-
-    /**
      * @ApiProperty(iri="http://schema.org/Text")
      * @Groups({"AuthenticDocumentRequest:output", "AuthenticDocumentRequest:input"})
      *
@@ -80,7 +64,7 @@ class AuthenticDocumentRequest
     /**
      * @Groups({"AuthenticDocumentRequest:output"})
      *
-     * @var \DateTime|null
+     * @var \DateTimeInterface|null
      */
     private $estimatedTimeOfArrival;
 
@@ -88,15 +72,13 @@ class AuthenticDocumentRequest
      * @ApiProperty(iri="https://schema.org/dateCreated")
      * @Groups({"AuthenticDocumentRequest:output"})
      *
-     * @var \DateTime
+     * @var \DateTimeInterface
      */
     private $dateCreated;
 
-    public function setIdentifier(string $identifier): self
+    public function setIdentifier(string $identifier): void
     {
         $this->identifier = $identifier;
-
-        return $this;
     }
 
     public function getIdentifier(): ?string
@@ -104,62 +86,39 @@ class AuthenticDocumentRequest
         return $this->identifier;
     }
 
-    public function getToken(): ?string
-    {
-        return $this->token;
-    }
-
-    public function setToken(string $token): self
-    {
-        $this->token = $token;
-
-        return $this;
-    }
-
     public function getTypeId(): ?string
     {
         return $this->typeId;
     }
 
-    public function setTypeId(string $typeId): self
+    public function setTypeId(string $typeId): void
     {
         $this->typeId = $typeId;
-
-        return $this;
     }
 
     /**
-     * @return ?\DateTime
+     * @return ?\DateTimeInterface
      */
-    public function getEstimatedTimeOfArrival(): ?\DateTime
+    public function getEstimatedTimeOfArrival(): ?\DateTimeInterface
     {
         return $this->estimatedTimeOfArrival;
     }
 
     /**
-     * @param ?\DateTime $estimatedTimeOfArrival
-     *
-     * @return AuthenticDocumentRequest
+     * @param ?\DateTimeInterface $estimatedTimeOfArrival
      */
-    public function setEstimatedTimeOfArrival(?\DateTime $estimatedTimeOfArrival): self
+    public function setEstimatedTimeOfArrival(?\DateTimeInterface $estimatedTimeOfArrival): void
     {
         $this->estimatedTimeOfArrival = $estimatedTimeOfArrival;
-
-        return $this;
     }
 
-    public function getDateCreated(): ?\DateTime
+    public function getDateCreated(): ?\DateTimeInterface
     {
         return $this->dateCreated;
     }
 
-    /**
-     * @return AuthenticDocumentRequest
-     */
-    public function setDateCreated(\DateTime $dateCreated): self
+    public function setDateCreated(\DateTimeInterface $dateCreated): void
     {
         $this->dateCreated = $dateCreated;
-
-        return $this;
     }
 }

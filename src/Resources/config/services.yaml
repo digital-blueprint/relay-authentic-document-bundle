@@ -1,7 +1,7 @@
 services:
   DBP\API\AuthenticDocumentBundle\Service\AuthenticDocumentApi:
-    public: false
     autowire: true
+    autoconfigure: true
 
   DBP\API\AuthenticDocumentBundle\DataPersister\:
     resource: '../../DataPersister'
@@ -39,19 +39,17 @@ services:
     autowire: true
     autoconfigure: true
 
-  DBP\API\AuthenticDocumentBundle\UCard\UCardService:
+  DBP\API\AuthenticDocumentBundle\UCard\UCardAPI:
     autowire: true
     autoconfigure: true
 
-
-  DBP\API\AuthenticDocumentBundle\Service\CampusOnlineApi:
+  DBP\API\AuthenticDocumentBundle\Service\CampusOnlineStorage:
     autowire: true
     autoconfigure: true
 
-  DBP\API\AuthenticDocumentBundle\Service\AuthenticDocumentHandlerProviderInterface:
-    '@DBP\API\AuthenticDocumentBundle\Service\CampusOnlineApi'
+  DBP\API\AuthenticDocumentBundle\DocumentHandler\DocumentHandler:
+    autowire: true
+    autoconfigure: true
 
-  # This alias exist so we can replace the service during tests
-  test.App\Service\AuthenticDocumentHandlerProviderInterface:
-    alias: 'DBP\API\AuthenticDocumentBundle\Service\AuthenticDocumentHandlerProviderInterface'
-    public: true
+  DBP\API\AuthenticDocumentBundle\API\DocumentStorageInterface:
+    '@DBP\API\AuthenticDocumentBundle\Service\CampusOnlineStorage'

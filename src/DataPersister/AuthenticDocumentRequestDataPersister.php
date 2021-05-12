@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace DBP\API\AuthenticDocumentBundle\DataPersister;
 
-use ApiPlatform\Core\DataPersister\DataPersisterInterface;
+use ApiPlatform\Core\DataPersister\ContextAwareDataPersisterInterface;
 use DBP\API\AuthenticDocumentBundle\Entity\AuthenticDocumentRequest;
 use DBP\API\AuthenticDocumentBundle\Service\AuthenticDocumentApi;
 use DBP\API\CoreBundle\Exception\ItemNotStoredException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
-final class AuthenticDocumentRequestDataPersister extends AbstractController implements DataPersisterInterface
+final class AuthenticDocumentRequestDataPersister extends AbstractController implements ContextAwareDataPersisterInterface
 {
     private $api;
 
@@ -23,34 +24,36 @@ final class AuthenticDocumentRequestDataPersister extends AbstractController imp
         $this->requestStack = $requestStack;
     }
 
-    public function supports($data): bool
+    public function supports($data, array $context = []): bool
     {
         return $data instanceof AuthenticDocumentRequest;
     }
 
     /**
-     * @param AuthenticDocumentRequest $authenticDocumentRequest
+     * @param AuthenticDocumentRequest $data
      *
      * @return AuthenticDocumentRequest
-     *
-     * @throws \DBP\API\CoreBundle\Exception\ItemNotStoredException
      */
-    public function persist($authenticDocumentRequest)
+    public function persist($data, array $context = [])
     {
+        $authenticDocumentRequest = $data;
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
-        $typeId = $authenticDocumentRequest->getTypeId();
+        $filters = $context['filters'] ?? [];
+        $token = $filters['token'] ?? $this->requestStack->getCurrentRequest()->headers->get('token');
+        if ($token === null) {
+            throw new BadRequestHttpException("Missing 'token' parameter or header");
+        }
 
-        if ($authenticDocumentRequest->getToken() === '' || $typeId === '') {
-            throw new ItemNotStoredException('Token and typeId are mandatory!');
+        $typeId = $authenticDocumentRequest->getTypeId();
+        if ($typeId === '') {
+            throw new ItemNotStoredException('typeId is mandatory!');
         }
 
         // TODO: Is there a better identifier? (not that we would need one)
         $authenticDocumentRequest->setIdentifier($typeId.'-'.time());
-        $authenticDocumentRequest->setDateCreated(new \DateTime());
-        $api = $this->api;
-        $authorizationHeader = $this->requestStack->getCurrentRequest()->headers->get('Authorization');
-        $message = $api->createAndDispatchAuthenticDocumentRequestMessage($authenticDocumentRequest, $authorizationHeader);
+        $authenticDocumentRequest->setDateCreated(new \DateTimeImmutable());
+        $message = $this->api->createAndDispatchAuthenticDocumentRequestMessage($authenticDocumentRequest, $token);
 
         $authenticDocumentRequest->setEstimatedTimeOfArrival($message->getEstimatedResponseDate());
 
@@ -58,9 +61,9 @@ final class AuthenticDocumentRequestDataPersister extends AbstractController imp
     }
 
     /**
-     * @param AuthenticDocumentRequest $authenticImageRequest
+     * @param AuthenticDocumentRequest $data
      */
-    public function remove($authenticImageRequest)
+    public function remove($data, array $context = [])
     {
     }
 }

@@ -11,6 +11,7 @@ use DBP\API\AuthenticDocumentBundle\Service\AuthenticDocumentApi;
 use DBP\API\CoreBundle\Helpers\ArrayFullPaginator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 final class AuthenticDocumentTypeCollectionDataProvider extends AbstractController implements CollectionDataProviderInterface, RestrictedDataProviderInterface
 {
@@ -41,12 +42,13 @@ final class AuthenticDocumentTypeCollectionDataProvider extends AbstractControll
         $api = $this->api;
         $filters = $context['filters'] ?? [];
 
-        // get the token as header variable if not set
-        if (!isset($filters['token'])) {
-            $filters['token'] = $this->requestStack->getCurrentRequest()->headers->get('token');
+        $token = $filters['token'] ?? $this->requestStack->getCurrentRequest()->headers->get('token');
+        if ($token === null) {
+            throw new BadRequestHttpException("Missing 'token' parameter or header");
         }
+        assert($token !== null);
 
-        $authenticDocumentTypes = $api->getAuthenticDocumentTypes($filters);
+        $authenticDocumentTypes = $api->getAuthenticDocumentTypes($token);
 
         $perPage = self::ITEMS_PER_PAGE;
         $page = 1;

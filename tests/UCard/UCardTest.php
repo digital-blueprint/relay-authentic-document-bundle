@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace DBP\API\AuthenticDocumentBundle\Tests\UCard;
 
 use DBP\API\AuthenticDocumentBundle\UCard\UCard;
+use DBP\API\AuthenticDocumentBundle\UCard\UCardAPI;
 use DBP\API\AuthenticDocumentBundle\UCard\UCardException;
 use DBP\API\AuthenticDocumentBundle\UCard\UCardPicture;
-use DBP\API\AuthenticDocumentBundle\UCard\UCardService;
 use DBP\API\AuthenticDocumentBundle\UCard\UCardType;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
@@ -26,7 +26,7 @@ class UCardTest extends WebTestCase
     protected function setUp(): void
     {
         $nullLogger = new Logger('dummy', [new NullHandler()]);
-        $this->api = new UCardService($nullLogger);
+        $this->api = new UCardAPI();
         $this->api->setBaseUrl('http://localhost');
         $this->api->setToken('sometoken');
         $this->mockResponses([]);
@@ -36,6 +36,25 @@ class UCardTest extends WebTestCase
     {
         $stack = HandlerStack::create(new MockHandler($responses));
         $this->api->setClientHandler($stack);
+    }
+
+    public function testFetchToken()
+    {
+        $this->mockResponses([
+            new Response(200, ['Content-Type' => 'application/json'], '{"access_token": "foobar"}'),
+        ]);
+        $this->api->fetchToken('foo', 'bar');
+        $this->assertTrue(true);
+    }
+
+    public function testFetchTokenNoAuth()
+    {
+        $this->mockResponses([
+            new Response(401, ['Content-Type' => 'application/json'],
+                '{"error":"invalid_client", "error_description":"Der Client ist nicht autorisiert.", "error_uri":""}'),
+        ]);
+        $this->expectException(UCardException::class);
+        $this->api->fetchToken('foo', 'bar');
     }
 
     public function testGetForIdentNoPermissions()

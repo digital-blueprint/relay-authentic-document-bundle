@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace DBP\API\AuthenticDocumentBundle\Command;
 
-use DBP\API\AuthenticDocumentBundle\UCard\UCardService;
+use DBP\API\AuthenticDocumentBundle\UCard\UCardAPI;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -20,7 +20,7 @@ class PictureFetchCommand extends Command implements ContainerAwareInterface
 
     private $service;
 
-    public function __construct(UCardService $service)
+    public function __construct(UCardAPI $service)
     {
         parent::__construct();
 
@@ -43,8 +43,7 @@ class PictureFetchCommand extends Command implements ContainerAwareInterface
 
         $service = $this->service;
         $service->setBaseUrl($baseUrl);
-        $token = $service->fetchToken($clientId, $clientSecret)['access_token'];
-        $service->setToken($token);
+        $service->fetchToken($clientId, $clientSecret);
 
         $ident = $input->getArgument('ident');
         $cards = $service->getCardsForIdent($ident);

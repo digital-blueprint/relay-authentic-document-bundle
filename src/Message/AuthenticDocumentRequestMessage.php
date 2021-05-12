@@ -24,12 +24,12 @@ class AuthenticDocumentRequestMessage
     private $typeId;
 
     /**
-     * @var \DateTime
+     * @var \DateTimeInterface
      */
     private $estimatedResponseDate;
 
     /**
-     * @var \DateTime
+     * @var \DateTimeInterface
      */
     private $requestCreatedDate;
 
@@ -48,8 +48,8 @@ class AuthenticDocumentRequestMessage
         ?Person $person,
         string $documentToken,
         string $typeId,
-        \DateTime $requestCreatedDate,
-        \DateTime $estimatedResponseDate,
+        \DateTimeInterface $requestCreatedDate,
+        \DateTimeInterface $estimatedResponseDate,
         int $retry = 0
     ) {
         $this->person = $person;
@@ -75,12 +75,12 @@ class AuthenticDocumentRequestMessage
         return $this->typeId;
     }
 
-    public function getEstimatedResponseDate(): \DateTime
+    public function getEstimatedResponseDate(): \DateTimeInterface
     {
         return $this->estimatedResponseDate;
     }
 
-    public function getRequestCreatedDate(): \DateTime
+    public function getRequestCreatedDate(): \DateTimeInterface
     {
         return $this->requestCreatedDate;
     }
@@ -100,13 +100,8 @@ class AuthenticDocumentRequestMessage
         ++$this->retry;
     }
 
-    /**
-     * @return AuthenticDocumentRequestMessage
-     */
-    public function setEstimatedResponseDate(\DateTime $estimatedResponseDate): self
+    public function setEstimatedResponseDate(\DateTimeInterface $estimatedResponseDate): void
     {
         $this->estimatedResponseDate = $estimatedResponseDate;
-
-        return $this;
     }
 }
