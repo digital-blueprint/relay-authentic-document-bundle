@@ -1,10 +1,7 @@
-{
+    {
     "urn:eidgvat:attributes.user.photo": {
         "urlsafe_attribute": "photo",
         "availability_status": "not_available",
-        "error_message": "photo_idr: Could not fetch the document from source within the expected time.; photo_fsr: Could not fetch the document from source within the expected time.",
-        "document_token": "topsecret-removed-by-me",
-        "expires": "2021-01-14T14:25:15.689+01:00",
-        "eta": "2021-01-13T17:10:00+01:00"
+        "error_message": "photo_idr: Could not fetch the document from source within the expected time.; photo_fsr: Could not fetch the document from source within the expected time."
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DBP\API\AuthenticDocumentBundle\Service;
 
+use DateTimeImmutable;
 use DBP\API\AuthenticDocumentBundle\API\DocumentStorageInterface;
 use DBP\API\AuthenticDocumentBundle\DocumentHandler\AvailabilityStatus;
 use DBP\API\AuthenticDocumentBundle\DocumentHandler\DocumentHandler;
@@ -73,11 +74,15 @@ class AuthenticDocumentApi implements LoggerAwareInterface
         AuthenticDocumentRequest $authenticDocumentRequest, string $token): AuthenticDocumentRequestMessage
     {
         $typeId = $authenticDocumentRequest->getTypeId();
+        $dateCreated = $authenticDocumentRequest->getDateCreated();
 
         $entry = $this->getDocumentIndexEntry($typeId, $token);
         if ($entry === null || $entry->availabilityStatus === AvailabilityStatus::NOT_AVAILABLE) {
             throw new NotFoundHttpException('Document is not available');
         }
+
+        // If it's already available there might be no eta, so just assume "now"
+        $eta = $entry->eta ?? new DateTimeImmutable();
 
         // we can decode the token here after if was proven valid by the request in getAuthenticDocumentType
         // note: it would also be possible to get the information from Keycloak directly but we don't want
@@ -105,7 +110,6 @@ class AuthenticDocumentApi implements LoggerAwareInterface
             throw new \Exception("Can't store");
         }
 
-        $dateCreated = $authenticDocumentRequest->getDateCreated();
         $message = new AuthenticDocumentRequestMessage($person, $entry->documentToken, $typeId, $dateCreated, $entry->eta);
         $this->bus->dispatch(
             $message, [

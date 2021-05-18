@@ -17,22 +17,22 @@ class DocumentIndexEntry
     public $availabilityStatus;
 
     /**
-     * @var string
+     * @var ?string
      */
     public $documentToken;
 
     /**
-     * @var \DateTimeInterface
+     * @var ?\DateTimeInterface
      */
     public $expires;
 
     /**
-     * @var \DateTimeInterface
+     * @var ?\DateTimeInterface
      */
     public $eta;
 
     /**
-     * @var string
+     * @var ?string
      */
     public $errorMessage;
 }

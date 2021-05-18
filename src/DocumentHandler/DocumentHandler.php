@@ -109,11 +109,14 @@ class DocumentHandler implements LoggerAwareInterface
         foreach ($json as $key => $item) {
             $entry = new DocumentIndexEntry();
             $entry->availabilityStatus = $item['availability_status'];
-            $entry->eta = new \DateTimeImmutable($item['eta']);
-            $entry->documentToken = $item['document_token'];
             $entry->urlsafeAttribute = $item['urlsafe_attribute'];
-            $entry->expires = new \DateTimeImmutable($item['expires']);
-            $entry->errorMessage = $item['error_message'] ?? '';
+            // eta only in case of "requested"
+            $entry->eta = isset($item['eta']) ? new \DateTimeImmutable($item['eta']) : null;
+            // document_token/expires only if not "not_available"
+            $entry->documentToken = $item['document_token'] ?? null;
+            $entry->expires = isset($item['expires']) ? new \DateTimeImmutable($item['expires']) : null;
+            // error_message only if "not_available"
+            $entry->errorMessage = $item['error_message'] ?? null;
             $results[$key] = $entry;
         }
 
