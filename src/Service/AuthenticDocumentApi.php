@@ -107,12 +107,10 @@ class AuthenticDocumentApi implements LoggerAwareInterface
 
         $dateCreated = $authenticDocumentRequest->getDateCreated();
         $message = new AuthenticDocumentRequestMessage($person, $entry->documentToken, $typeId, $dateCreated, $entry->eta);
-        $envelope = $this->bus->dispatch(
+        $this->bus->dispatch(
             $message, [
             $this->getDelayStampFromDocumentIndexEntry($entry),
         ]);
-
-        dump($envelope);
 
         return $message;
     }
@@ -135,7 +133,6 @@ class AuthenticDocumentApi implements LoggerAwareInterface
      */
     public function handleRequestMessage(AuthenticDocumentRequestMessage $message)
     {
-        dump($message);
         $documentToken = $message->getDocumentToken();
         $typeId = $message->getTypeId();
 
