@@ -84,6 +84,12 @@ class AuthenticDocumentApi implements LoggerAwareInterface
         // If it's already available there might be no eta, so just assume "now"
         $eta = $entry->eta ?? new DateTimeImmutable();
 
+        // XXX: for demo/test purposes
+        if ($_ENV['APP_DEPLOYMENT_ENV'] !== 'production' && $token === 'photo-jpeg-available-token') {
+            return new AuthenticDocumentRequestMessage(
+                null, 'foobar', $typeId, $dateCreated, $eta);
+        }
+
         // we can decode the token here after if was proven valid by the request in getAuthenticDocumentType
         // note: it would also be possible to get the information from Keycloak directly but we don't want
         //       to be locked in into it and don't know if all data is available
