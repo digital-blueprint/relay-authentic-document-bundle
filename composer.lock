@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e2796fb3333d17884f668b9fef53ec7d",
+    "content-hash": "def80299d985004285e1fa42be2b69a4",
     "packages": [
         {
             "name": "api-platform/core",
@@ -225,7 +225,7 @@
             "version": "dev-main",
             "source": {
                 "type": "git",
-                "url": "git@gitlab.tugraz.at:dbp/middleware/dbp-api/api-core-bundle.git",
+                "url": "git@gitlab.tugraz.at:dbp/dbp-api/api-core-bundle.git",
                 "reference": "ef226462b10b35dc4c0fc1b085a894eb2774a488"
             },
             "require": {
