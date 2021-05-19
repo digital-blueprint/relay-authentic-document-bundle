@@ -20,6 +20,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *             "security" = "is_granted('IS_AUTHENTICATED_FULLY')",
  *             "method" = "GET",
  *             "openapi_context" = {
+ *                 "tags" = {"AuthDoc"},
  *                 "parameters" = {
  *                     {"name" = "token", "in" = "header", "description" = "Token", "type" = "string", "example" = "photo-jpeg-available-token", "required" = true}
  *                 }
@@ -31,6 +32,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *             "security" = "is_granted('IS_AUTHENTICATED_FULLY')",
  *             "method" = "GET",
  *             "openapi_context" = {
+ *                 "tags" = {"AuthDoc"},
  *                 "parameters" = {
  *                     {"name" = "id", "in" = "path", "description" = "Id", "type" = "string", "example" = "dummy-photo-jpeg-available", "required" = true},
  *                     {"name" = "token", "in" = "header", "description" = "Token", "type" = "string", "example" = "photo-jpeg-available-token", "required" = true}

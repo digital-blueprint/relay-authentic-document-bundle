@@ -17,13 +17,17 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *     },
  *     collectionOperations={
  *         "get" = {
- *             "security" = "is_granted('IS_AUTHENTICATED_FULLY')"
+ *             "security" = "is_granted('IS_AUTHENTICATED_FULLY')",
+ *             "openapi_context" = {
+ *                 "tags" = {"AuthDoc"},
+ *             },
  *         }
  *     },
  *     itemOperations={
  *         "get" = {
  *             "security" = "is_granted('IS_AUTHENTICATED_FULLY')",
  *             "openapi_context" = {
+ *                 "tags" = {"AuthDoc"},
  *                 "parameters" = {
  *                     {"name" = "id", "in" = "path", "description" = "Id of document to fetch", "required" = true, "type" = "string", "example" = "dummy-photo-jpeg-available"},
  *                     {"name" = "token", "in" = "header", "description" = "Token", "type" = "string", "example" = "photo-jpeg-available-token", "required" = true}

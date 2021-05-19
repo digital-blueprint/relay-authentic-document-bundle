@@ -17,13 +17,17 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *     },
  *     collectionOperations={
  *         "get" = {
- *             "security" = "is_granted('IS_AUTHENTICATED_FULLY')"
+ *             "security" = "is_granted('IS_AUTHENTICATED_FULLY')",
+ *             "openapi_context" = {
+ *                 "tags" = {"AuthDoc"},
+ *             },
  *         },
  *         "post" = {
  *             "security" = "is_granted('IS_AUTHENTICATED_FULLY')",
  *             "method" = "POST",
  *             "status" = 202,
  *             "openapi_context" = {
+ *                 "tags" = {"AuthDoc"},
  *                 "parameters" = {
  *                     {"name" = "body", "in" = "path", "description" = "Token", "type" = "string", "example" = {"token" = "photo-jpeg-available-token", "typeId" = "dummy-photo-jpeg-available"}, "required" = true}
  *                 }
@@ -32,7 +36,10 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *     },
  *     itemOperations={
  *         "get" = {
- *             "security" = "is_granted('IS_AUTHENTICATED_FULLY')"
+ *             "security" = "is_granted('IS_AUTHENTICATED_FULLY')",
+ *             "openapi_context" = {
+ *                 "tags" = {"AuthDoc"},
+ *             },
  *         }
  *     },
  *     iri="https://schema.tugraz.at/AuthenticDocumentRequest",
