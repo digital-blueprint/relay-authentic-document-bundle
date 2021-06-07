@@ -111,7 +111,7 @@ class UCardTest extends WebTestCase
         ]);
 
         $this->expectException(UCardException::class);
-        $this->expectExceptionMessageRegExp('/Not allowed for given identity and card type/');
+        $this->expectExceptionMessageMatches('/Not allowed for given identity and card type/');
         $this->api->createCardForIdent(self::IDENT, UCardType::STA);
     }
 
@@ -123,7 +123,7 @@ class UCardTest extends WebTestCase
         ]);
 
         $this->expectException(UCardException::class);
-        $this->expectExceptionMessageRegExp('/already exists/');
+        $this->expectExceptionMessageMatches('/already exists/');
         $this->api->createCardForIdent(self::IDENT, UCardType::STA);
     }
 
@@ -161,7 +161,7 @@ class UCardTest extends WebTestCase
         $card = new UCard(self::IDENT, UCardType::STA, self::CONTENT_ID, 0, false);
 
         $this->expectException(UCardException::class);
-        $this->expectExceptionMessageRegExp('/Update of photo is not allowed/');
+        $this->expectExceptionMessageMatches('/Update of photo is not allowed/');
         $this->api->setCardPicture($card, 'foobar');
     }
 }
