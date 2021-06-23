@@ -18,7 +18,6 @@ use DBP\API\CoreBundle\Service\PersonProviderInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
@@ -52,19 +51,19 @@ class AuthenticDocumentApi implements LoggerAwareInterface
         LoggerInterface $logger,
         PersonProviderInterface $personProvider,
         DocumentStorageInterface $storage,
-        DocumentHandler $documentHandler,
-        ContainerInterface $container
+        DocumentHandler $documentHandler
     ) {
         $this->bus = $bus;
         $this->logger = $logger;
         $this->personProvider = $personProvider;
         $this->storage = $storage;
         $this->documentHandler = $documentHandler;
+    }
 
-        $config = $container->getParameter('dbp_api.authenticdocument.config');
-        assert(is_array($config));
-        $documentHandler->setIDPUrl($config['dhandler_idp_url'] ?? '');
-        $documentHandler->setHandlerUrl($config['dhandler_api_url'] ?? '');
+    public function setConfig(array $config)
+    {
+        $this->documentHandler->setIDPUrl($config['dhandler_idp_url'] ?? '');
+        $this->documentHandler->setHandlerUrl($config['dhandler_api_url'] ?? '');
     }
 
     /**

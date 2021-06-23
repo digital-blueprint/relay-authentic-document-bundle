@@ -43,7 +43,11 @@ class DbpAuthenticDocumentExtension extends ConfigurableExtension implements Pre
 
         $loader->load('services.yaml');
 
-        $container->setParameter('dbp_api.authenticdocument.config', $mergedConfig);
+        $definition = $container->getDefinition('DBP\API\AuthenticDocumentBundle\Service\AuthenticDocumentApi');
+        $definition->addMethodCall('setConfig', [$mergedConfig]);
+
+        $definition = $container->getDefinition('DBP\API\AuthenticDocumentBundle\Service\CampusOnlineStorage');
+        $definition->addMethodCall('setConfig', [$mergedConfig]);
     }
 
     private function extendArrayParameter(ContainerBuilder $container, string $parameter, array $values)

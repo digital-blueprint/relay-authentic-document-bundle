@@ -12,7 +12,6 @@ use DBP\API\AuthenticDocumentBundle\UCard\UCardType;
 use DBP\API\CoreBundle\Entity\Person;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class CampusOnlineStorage implements DocumentStorageInterface, LoggerAwareInterface
 {
@@ -27,14 +26,27 @@ class CampusOnlineStorage implements DocumentStorageInterface, LoggerAwareInterf
 
     private $container;
 
+    private $clientId;
+    private $clientSecret;
+    private $baseUrl;
+
     // FIXME: Force BA for testing purposes
     private const CARD_TYPE = UCardType::BA;
 
-    public function __construct(UCardAPI $ucard, ContainerInterface $container)
+    public function __construct(UCardAPI $ucard)
     {
         $this->api = $ucard;
         $this->setupDone = false;
-        $this->container = $container;
+        $this->clientId = '';
+        $this->clientSecret = '';
+        $this->baseUrl = '';
+    }
+
+    public function setConfig(array $config)
+    {
+        $this->clientId = $config['co_oauth2_api_client_id'] ?? '';
+        $this->clientSecret = $config['co_oauth2_api_client_secret'] ?? '';
+        $this->baseUrl = $config['co_oauth2_api_api_url'] ?? '';
     }
 
     /**
@@ -44,15 +56,9 @@ class CampusOnlineStorage implements DocumentStorageInterface, LoggerAwareInterf
     {
         // NOTE: this doesn't work for long running processes, since the token will expire
         if (!$this->setupDone) {
-            $config = $this->container->getParameter('dbp_api.authenticdocument.config');
-            assert(is_array($config));
-            $clientId = $config['co_oauth2_api_client_id'] ?? '';
-            $clientSecret = $config['co_oauth2_api_client_secret'] ?? '';
-            $baseUrl = $config['co_oauth2_api_api_url'] ?? '';
-
-            $this->api->setBaseUrl($baseUrl);
+            $this->api->setBaseUrl($this->baseUrl);
             try {
-                $this->api->fetchToken($clientId, $clientSecret);
+                $this->api->fetchToken($this->clientId, $this->clientSecret);
             } catch (UCardException $e) {
                 throw new DocumentStorageException($e->getMessage());
             }
