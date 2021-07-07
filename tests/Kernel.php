@@ -6,6 +6,7 @@ namespace DBP\API\AuthenticDocumentBundle\Tests;
 
 use ApiPlatform\Core\Bridge\Symfony\Bundle\ApiPlatformBundle;
 use DBP\API\AuthenticDocumentBundle\DbpAuthenticDocumentBundle;
+use DBP\API\BaseBundle\DbpBaseBundle;
 use DBP\API\CoreBundle\DbpCoreBundle;
 use Nelmio\CorsBundle\NelmioCorsBundle;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
@@ -29,6 +30,7 @@ class Kernel extends BaseKernel
         yield new NelmioCorsBundle();
         yield new ApiPlatformBundle();
         yield new DbpAuthenticDocumentBundle();
+        yield new DbpBaseBundle();
         yield new DbpCoreBundle();
     }
 

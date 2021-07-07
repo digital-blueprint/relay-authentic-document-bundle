@@ -14,7 +14,7 @@ use DBP\API\AuthenticDocumentBundle\Entity\AuthenticDocumentRequest;
 use DBP\API\AuthenticDocumentBundle\Entity\AuthenticDocumentType;
 use DBP\API\AuthenticDocumentBundle\Helpers\Tools;
 use DBP\API\AuthenticDocumentBundle\Message\AuthenticDocumentRequestMessage;
-use DBP\API\CoreBundle\API\PersonProviderInterface;
+use DBP\API\BaseBundle\API\PersonProviderInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
@@ -96,10 +96,10 @@ class AuthenticDocumentApi implements LoggerAwareInterface
         $tokenInformation = $this->documentHandler->getUserInfo($token);
         $givenName = $tokenInformation->givenName;
         $familyName = $tokenInformation->familyName;
-        $birthDay = $tokenInformation->birthDate;
+        $birthDate = $tokenInformation->birthDate;
 
-        // try to match name and birthday to a person
-        $people = $this->personProvider->getPersonsByNameAndBirthday($givenName, $familyName, new \DateTime($birthDay));
+        // try to match name and birthdate to a person
+        $people = $this->personProvider->getPersonsByNameAndBirthDate($givenName, $familyName, $birthDate);
         $peopleCount = count($people);
 
         if ($peopleCount === 0) {

@@ -9,7 +9,7 @@ use DBP\API\AuthenticDocumentBundle\API\DocumentStorageInterface;
 use DBP\API\AuthenticDocumentBundle\UCard\UCardAPI;
 use DBP\API\AuthenticDocumentBundle\UCard\UCardException;
 use DBP\API\AuthenticDocumentBundle\UCard\UCardType;
-use DBP\API\CoreBundle\Entity\Person;
+use DBP\API\BaseBundle\Entity\Person;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 

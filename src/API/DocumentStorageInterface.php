@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace DBP\API\AuthenticDocumentBundle\API;
 
-use DBP\API\CoreBundle\Entity\Person;
+use DBP\API\BaseBundle\Entity\Person;
 
 interface DocumentStorageInterface
 {
