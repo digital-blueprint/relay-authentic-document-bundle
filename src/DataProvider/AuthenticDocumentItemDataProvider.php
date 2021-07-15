@@ -29,9 +29,6 @@ final class AuthenticDocumentItemDataProvider extends AbstractController impleme
         return AuthenticDocument::class === $resourceClass;
     }
 
-    /**
-     * @throws \DBP\API\CoreBundle\Exception\ItemNotLoadedException
-     */
     public function getItem(string $resourceClass, $id, string $operationName = null, array $context = []): ?AuthenticDocument
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');

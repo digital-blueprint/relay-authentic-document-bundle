@@ -32,9 +32,6 @@ final class AuthenticDocumentTypeCollectionDataProvider extends AbstractControll
         return AuthenticDocumentType::class === $resourceClass;
     }
 
-    /**
-     * @throws \DBP\API\CoreBundle\Exception\ItemNotLoadedException
-     */
     public function getCollection(string $resourceClass, string $operationName = null, array $context = []): ArrayFullPaginator
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');

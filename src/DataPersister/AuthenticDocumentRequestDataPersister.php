@@ -7,7 +7,6 @@ namespace DBP\API\AuthenticDocumentBundle\DataPersister;
 use ApiPlatform\Core\DataPersister\ContextAwareDataPersisterInterface;
 use DBP\API\AuthenticDocumentBundle\Entity\AuthenticDocumentRequest;
 use DBP\API\AuthenticDocumentBundle\Service\AuthenticDocumentApi;
-use DBP\API\CoreBundle\Exception\ItemNotStoredException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -47,7 +46,7 @@ final class AuthenticDocumentRequestDataPersister extends AbstractController imp
 
         $typeId = $authenticDocumentRequest->getTypeId();
         if ($typeId === '') {
-            throw new ItemNotStoredException('typeId is mandatory!');
+            throw new BadRequestHttpException('typeId is mandatory!');
         }
 
         // TODO: Is there a better identifier? (not that we would need one)
