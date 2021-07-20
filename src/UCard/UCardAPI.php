@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace DBP\API\AuthenticDocumentBundle\UCard;
 
-use DBP\API\CoreBundle\Helpers\GuzzleTools;
-use DBP\API\CoreBundle\Helpers\Tools as CoreTools;
+use DBP\API\AuthenticDocumentBundle\Helpers\Tools;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\HandlerStack;
@@ -54,7 +53,7 @@ class UCardAPI implements LoggerAwareInterface
             'handler' => $stack,
         ];
         if ($this->logger !== null) {
-            $stack->push(GuzzleTools::createLoggerMiddleware($this->logger));
+            $stack->push(Tools::createLoggerMiddleware($this->logger));
         }
         $client = new Client($client_options);
 
@@ -71,7 +70,7 @@ class UCardAPI implements LoggerAwareInterface
         }
         $data = $response->getBody()->getContents();
 
-        $token = CoreTools::decodeJSON($data, true);
+        $token = Tools::decodeJSON($data, true);
         $this->setToken($token['access_token']);
     }
 
@@ -109,7 +108,7 @@ class UCardAPI implements LoggerAwareInterface
         ];
 
         if ($this->logger !== null) {
-            $stack->push(GuzzleTools::createLoggerMiddleware($this->logger));
+            $stack->push(Tools::createLoggerMiddleware($this->logger));
         }
 
         $client = new Client($client_options);
@@ -192,7 +191,7 @@ class UCardAPI implements LoggerAwareInterface
     public function parseGetResponse(ResponseInterface $response): array
     {
         $content = (string) $response->getBody();
-        $json = CoreTools::decodeJSON($content, true);
+        $json = Tools::decodeJSON($content, true);
 
         $cards = [];
         foreach ($json['resource'] as $res) {
@@ -211,7 +210,7 @@ class UCardAPI implements LoggerAwareInterface
     public function parseGetContentResponse(ResponseInterface $response): UCardPicture
     {
         $content = (string) $response->getBody();
-        $json = CoreTools::decodeJSON($content, true);
+        $json = Tools::decodeJSON($content, true);
 
         $pic = $json['resource'][0]['content']['plsqlCardPicture'];
         $id = (string) $pic['ID'];
@@ -238,7 +237,7 @@ class UCardAPI implements LoggerAwareInterface
             return new UCardException('Unknown error');
         }
         $data = (string) $e->getResponse()->getBody();
-        $json = CoreTools::decodeJSON($data, true);
+        $json = Tools::decodeJSON($data, true);
         if ($json['type'] ?? '' === 'resources') {
             $coErrorDto = $json['resource'][0]['content']['coErrorDto'];
             $message = $coErrorDto['errorType'].'['.$coErrorDto['httpCode'].']: '.$coErrorDto['message'];
@@ -273,7 +272,7 @@ class UCardAPI implements LoggerAwareInterface
         }
 
         $content = (string) $response->getBody();
-        CoreTools::decodeJSON($content, true);
+        Tools::decodeJSON($content, true);
     }
 
     /**
@@ -306,6 +305,6 @@ class UCardAPI implements LoggerAwareInterface
         }
 
         $content = (string) $response->getBody();
-        CoreTools::decodeJSON($content, true);
+        Tools::decodeJSON($content, true);
     }
 }

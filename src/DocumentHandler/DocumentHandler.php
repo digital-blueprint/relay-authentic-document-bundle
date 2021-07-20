@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace DBP\API\AuthenticDocumentBundle\DocumentHandler;
 
-use DBP\API\CoreBundle\Helpers\GuzzleTools;
-use DBP\API\CoreBundle\Helpers\Tools as CoreTools;
+use DBP\API\AuthenticDocumentBundle\Helpers\Tools;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\HandlerStack;
@@ -47,7 +46,7 @@ class DocumentHandler implements LoggerAwareInterface
         $client_options = [
             'handler' => $stack,
         ];
-        $stack->push(GuzzleTools::createLoggerMiddleware($this->logger));
+        $stack->push(Tools::createLoggerMiddleware($this->logger));
 
         return new Client($client_options);
     }
@@ -56,7 +55,7 @@ class DocumentHandler implements LoggerAwareInterface
     {
         $body = $response->getBody();
 
-        return CoreTools::decodeJSON((string) $body, true);
+        return json_decode((string) $body, true, 512, JSON_THROW_ON_ERROR);
     }
 
     public function getUserInfo($token): TokenInformation
