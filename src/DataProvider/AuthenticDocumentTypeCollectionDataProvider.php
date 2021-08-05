@@ -8,7 +8,7 @@ use ApiPlatform\Core\DataProvider\CollectionDataProviderInterface;
 use ApiPlatform\Core\DataProvider\RestrictedDataProviderInterface;
 use DBP\API\AuthenticDocumentBundle\Entity\AuthenticDocumentType;
 use DBP\API\AuthenticDocumentBundle\Service\AuthenticDocumentApi;
-use DBP\API\CoreBundle\Helpers\ArrayFullPaginator;
+use Dbp\Relay\CoreBundle\Helpers\ArrayFullPaginator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
