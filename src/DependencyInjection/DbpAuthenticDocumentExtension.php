@@ -48,6 +48,12 @@ class DbpAuthenticDocumentExtension extends ConfigurableExtension implements Pre
 
         $definition = $container->getDefinition('DBP\API\AuthenticDocumentBundle\Service\CampusOnlineStorage');
         $definition->addMethodCall('setConfig', [$mergedConfig]);
+
+        $definition = $container->getDefinition('DBP\API\AuthenticDocumentBundle\Command\PictureFetchCommand');
+        $definition->addMethodCall('setConfig', [$mergedConfig]);
+
+        $definition = $container->getDefinition('DBP\API\AuthenticDocumentBundle\Command\PictureUploadCommand');
+        $definition->addMethodCall('setConfig', [$mergedConfig]);
     }
 
     private function extendArrayParameter(ContainerBuilder $container, string $parameter, array $values)

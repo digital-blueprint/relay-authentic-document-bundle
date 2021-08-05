@@ -9,22 +9,25 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\DependencyInjection\ContainerAwareInterface;
-use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 
-class PictureUploadCommand extends Command implements ContainerAwareInterface
+class PictureUploadCommand extends Command
 {
-    use ContainerAwareTrait;
-
     protected static $defaultName = 'dbp:picture-upload';
 
     private $service;
+    private $config;
 
     public function __construct(UCardAPI $service)
     {
         parent::__construct();
 
         $this->service = $service;
+        $this->config = [];
+    }
+
+    public function setConfig(array $config)
+    {
+        $this->config = $config;
     }
 
     protected function configure()
@@ -37,8 +40,7 @@ class PictureUploadCommand extends Command implements ContainerAwareInterface
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $config = $this->container->getParameter('dbp_api.authenticdocument.config');
-        assert(is_array($config));
+        $config = $this->config;
         $clientId = $config['co_oauth2_api_client_id'] ?? '';
         $clientSecret = $config['co_oauth2_api_client_secret'] ?? '';
         $baseUrl = $config['co_oauth2_api_api_url'] ?? '';
