@@ -287,7 +287,7 @@ class AuthenticDocumentApi implements LoggerAwareInterface
         $entry = $this->getDocumentIndexEntry($id, $token);
 
         if ($entry === null) {
-            throw new NotFoundHttpException('id no found');
+            throw new NotFoundHttpException('id not found');
         }
 
         if ($entry->availabilityStatus !== AvailabilityStatus::AVAILABLE) {
