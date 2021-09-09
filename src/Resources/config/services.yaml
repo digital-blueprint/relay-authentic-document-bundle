@@ -43,13 +43,6 @@ services:
     autowire: true
     autoconfigure: true
 
-  DBP\API\AuthenticDocumentBundle\Service\CampusOnlineStorage:
-    autowire: true
-    autoconfigure: true
-
   DBP\API\AuthenticDocumentBundle\DocumentHandler\DocumentHandler:
     autowire: true
     autoconfigure: true
-
-  DBP\API\AuthenticDocumentBundle\API\DocumentStorageInterface:
-    '@DBP\API\AuthenticDocumentBundle\Service\CampusOnlineStorage'
