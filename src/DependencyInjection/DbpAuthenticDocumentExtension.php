@@ -46,9 +46,6 @@ class DbpAuthenticDocumentExtension extends ConfigurableExtension implements Pre
         $definition = $container->getDefinition('DBP\API\AuthenticDocumentBundle\Service\AuthenticDocumentApi');
         $definition->addMethodCall('setConfig', [$mergedConfig]);
 
-        $definition = $container->getDefinition('DBP\API\AuthenticDocumentBundle\Service\CampusOnlineStorage');
-        $definition->addMethodCall('setConfig', [$mergedConfig]);
-
         $definition = $container->getDefinition('DBP\API\AuthenticDocumentBundle\Command\PictureFetchCommand');
         $definition->addMethodCall('setConfig', [$mergedConfig]);
 
