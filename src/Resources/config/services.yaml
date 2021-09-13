@@ -39,10 +39,6 @@ services:
     autowire: true
     autoconfigure: true
 
-  DBP\API\AuthenticDocumentBundle\UCard\UCardAPI:
-    autowire: true
-    autoconfigure: true
-
   DBP\API\AuthenticDocumentBundle\DocumentHandler\DocumentHandler:
     autowire: true
     autoconfigure: true
