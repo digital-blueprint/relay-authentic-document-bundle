@@ -1,0 +1,7 @@
+services:
+  DBP\API\AuthenticDocumentBundle\TestUtils\DummyDocumentStorage:
+    autowire: true
+    autoconfigure: true
+
+  DBP\API\AuthenticDocumentBundle\API\DocumentStorageInterface:
+    '@DBP\API\AuthenticDocumentBundle\TestUtils\DummyDocumentStorage'
