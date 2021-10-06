@@ -14,7 +14,7 @@ use DBP\API\AuthenticDocumentBundle\Entity\AuthenticDocumentRequest;
 use DBP\API\AuthenticDocumentBundle\Entity\AuthenticDocumentType;
 use DBP\API\AuthenticDocumentBundle\Helpers\Tools;
 use DBP\API\AuthenticDocumentBundle\Message\AuthenticDocumentRequestMessage;
-use DBP\API\BaseBundle\API\PersonProviderInterface;
+use Dbp\Relay\BaseBundle\API\PersonProviderInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace DBP\API\AuthenticDocumentBundle\Message;
 
-use DBP\API\BaseBundle\Entity\Person;
+use Dbp\Relay\BaseBundle\Entity\Person;
 
 class AuthenticDocumentRequestMessage
 {

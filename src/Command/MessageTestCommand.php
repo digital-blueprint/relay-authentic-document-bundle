@@ -11,7 +11,7 @@ declare(strict_types=1);
 namespace DBP\API\AuthenticDocumentBundle\Command;
 
 use DBP\API\AuthenticDocumentBundle\Message\AuthenticDocumentRequestMessage;
-use DBP\API\BaseBundle\API\PersonProviderInterface;
+use Dbp\Relay\BaseBundle\API\PersonProviderInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
