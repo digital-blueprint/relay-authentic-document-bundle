@@ -41,6 +41,17 @@ Add this bundle to `./symfony.lock`:
 ...
 ```
 
+## Configuration
+
+You need to set an environment variable `MESSENGER_TRANSPORT_DSN` in your `.env` file or by any other means.
+[Redis](https://redis.io/) is also the best way for this.
+
+Example:
+
+```dotenv
+MESSENGER_TRANSPORT_DSN=redis://redis:6379/local-messages/symfony/consumer?auto_setup=true&serializer=1&stream_max_entries=0&dbindex=0
+```
+
 ## Development
 
 The `console` shell script in the `docker` directory is running commands inside the php container.
