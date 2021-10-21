@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace DBP\API\AuthenticDocumentBundle\TestUtils;
 
 use DBP\API\AuthenticDocumentBundle\API\DocumentStorageInterface;
-use Dbp\Relay\BaseBundle\Entity\Person;
+use Dbp\Relay\BasePersonBundle\Entity\Person;
 
 class DummyDocumentStorage implements DocumentStorageInterface
 {
