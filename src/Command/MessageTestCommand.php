@@ -46,7 +46,7 @@ class MessageTestCommand extends Command
         $this->setDescription('Just for testing. Please ignore.');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $person = $this->personProvider->getPerson('woody007');
 
