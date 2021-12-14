@@ -48,5 +48,8 @@ class Kernel extends BaseKernel
             'test' => true,
             'secret' => '',
         ]);
+        $container->extension('dbp_relay_core', [
+            'queue_dsn' => 'in-memory://',
+        ]);
     }
 }
