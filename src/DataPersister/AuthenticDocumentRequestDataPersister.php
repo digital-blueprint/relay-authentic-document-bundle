@@ -29,13 +29,14 @@ final class AuthenticDocumentRequestDataPersister extends AbstractController imp
     }
 
     /**
-     * @param AuthenticDocumentRequest $data
+     * @param mixed $data
      *
      * @return AuthenticDocumentRequest
      */
     public function persist($data, array $context = [])
     {
         $authenticDocumentRequest = $data;
+        assert($authenticDocumentRequest instanceof AuthenticDocumentRequest);
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
         $filters = $context['filters'] ?? [];
@@ -60,7 +61,7 @@ final class AuthenticDocumentRequestDataPersister extends AbstractController imp
     }
 
     /**
-     * @param AuthenticDocumentRequest $data
+     * @param mixed $data
      */
     public function remove($data, array $context = [])
     {
