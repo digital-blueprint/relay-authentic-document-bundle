@@ -99,7 +99,8 @@ class AuthenticDocumentApi implements LoggerAwareInterface
         $birthDate = $tokenInformation->birthDate;
 
         // try to match name and birthdate to a person
-        $people = $this->personProvider->getPersonsByNameAndBirthDate($givenName, $familyName, $birthDate);
+        // FIXME: this still needs to be implemented
+        $people = [];
         $peopleCount = count($people);
 
         if ($peopleCount === 0) {
@@ -108,6 +109,7 @@ class AuthenticDocumentApi implements LoggerAwareInterface
             throw new NotFoundHttpException("Multiple people with name $givenName $familyName were found!");
         }
 
+        assert(count($people));
         $person = $people[0];
 
         // Before we queue anything we check if we can store it first
