@@ -38,7 +38,7 @@ class MailTestCommand extends Command
         $this->setDescription('Just for testing. Please ignore.');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         // TODO: send email (keep in mind tugraz.at seems to deny mails from our docker smtp)
         $email = (new Email())
