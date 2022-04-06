@@ -11,10 +11,10 @@ class ApiTest extends ApiTestCase
     public function testNotAuth()
     {
         $endpoints = [
-            ['POST', '/authentic_document_requests', 401],
-            ['GET', '/authentic_document_types', 401],
-            ['GET', '/authentic_document_types/42', 401],
-            ['GET', '/authentic_documents/42', 401],
+            ['POST', '/authentic-document-requests', 401],
+            ['GET', '/authentic-document-types', 401],
+            ['GET', '/authentic-document-types/42', 401],
+            ['GET', '/authentic-documents/42', 401],
         ];
 
         foreach ($endpoints as $ep) {

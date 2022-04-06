@@ -17,7 +17,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *     },
  *     collectionOperations={
  *         "get" = {
- *             "path" = "/authentic_document_types",
+ *             "path" = "/authentic-document-types",
  *             "security" = "is_granted('IS_AUTHENTICATED_FULLY')",
  *             "method" = "GET",
  *             "openapi_context" = {
@@ -30,7 +30,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *     },
  *     itemOperations={
  *         "get" = {
- *             "path" = "/authentic_document_types/{identifier}",
+ *             "path" = "/authentic-document-types/{identifier}",
  *             "security" = "is_granted('IS_AUTHENTICATED_FULLY')",
  *             "method" = "GET",
  *             "openapi_context" = {

@@ -28,9 +28,9 @@ class DbpAuthenticDocumentExtension extends ConfigurableExtension implements Pre
     public function loadInternal(array $mergedConfig, ContainerBuilder $container)
     {
         $this->extendArrayParameter($container, 'dbp_api.paths_to_hide', [
-            '/authentic_documents',
-            '/authentic_document_requests',
-            '/authentic_document_requests/{identifier}',
+            '/authentic-documents',
+            '/authentic-document-requests',
+            '/authentic-document-requests/{identifier}',
         ]);
 
         $this->extendArrayParameter(
