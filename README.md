@@ -1,5 +1,10 @@
 # api-authentic-document-bundle
 
+[GitLab](https://gitlab.tugraz.at/dbp/authentic-documents/api-authentic-document-bundle) |
+[Frontend Application](https://gitlab.tugraz.at/dbp/authentic-documents/authenticdocument)
+
+There is a corresponding frontend application that uses this API at [Authentic Document Frontend Application](https://gitlab.tugraz.at/dbp/authentic-documents/authenticdocument).
+
 This Symfony 4.4 bundle provides API endpoints for
 
 - TBD
