@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace DBP\API\AuthenticDocumentBundle\DependencyInjection;
 
+use DBP\API\AuthenticDocumentBundle\Message\AuthenticDocumentRequestMessage;
+use Dbp\Relay\CoreBundle\Extension\ExtensionTrait;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
@@ -12,29 +14,28 @@ use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
 
 class DbpAuthenticDocumentExtension extends ConfigurableExtension implements PrependExtensionInterface
 {
+    use ExtensionTrait;
+
     public function prepend(ContainerBuilder $container)
     {
-        // https://symfony.com/doc/4.4/messenger.html#transports-async-queued-messages
-        $this->extendArrayParameter($container, 'dbp_api.messenger_routing', [
-            'DBP\API\AuthenticDocumentBundle\Message\AuthenticDocumentRequestMessage' => 'async',
-        ]);
-
+        $this->addQueueMessage($container, AuthenticDocumentRequestMessage::class);
         // Used in the data providers
-        $this->extendArrayParameter(
-            $container, 'dbp_api.allow_headers', ['Token']
-        );
+        $this->addAllowHeader($container, 'Token');
     }
 
     public function loadInternal(array $mergedConfig, ContainerBuilder $container)
     {
-        $this->extendArrayParameter($container, 'dbp_api.paths_to_hide', [
+        $pathsToHide = [
             '/authentic-documents',
             '/authentic-document-requests',
             '/authentic-document-requests/{identifier}',
-        ]);
+        ];
 
-        $this->extendArrayParameter(
-            $container, 'api_platform.resource_class_directories', [__DIR__.'/../Entity']);
+        foreach ($pathsToHide as $path) {
+            $this->addPathToHide($container, $path);
+        }
+
+        $this->addResourceClassDirectory($container, __DIR__.'/../Entity');
 
         $loader = new YamlFileLoader(
             $container,
