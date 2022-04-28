@@ -19,7 +19,7 @@ use Symfony\Component\Mime\Email;
 class MailTestCommand extends Command
 {
     // the name of the command (the part after "bin/console")
-    protected static $defaultName = 'dbp:mail-test';
+    protected static $defaultName = 'dbp:relay:authentic-document:mail-test';
 
     /**
      * @var MailerInterface

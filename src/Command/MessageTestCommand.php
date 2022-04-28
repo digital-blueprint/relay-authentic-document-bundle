@@ -21,7 +21,7 @@ use Symfony\Component\Messenger\Stamp\DelayStamp;
 class MessageTestCommand extends Command
 {
     // the name of the command (the part after "bin/console")
-    protected static $defaultName = 'dbp:message-test';
+    protected static $defaultName = 'dbp:relay:authentic-document:message-test';
 
     /**
      * @var MessageBusInterface
