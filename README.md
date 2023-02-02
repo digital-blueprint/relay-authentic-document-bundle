@@ -1,11 +1,11 @@
-# api-authentic-document-bundle
+# DbpAuthenticDocumentBundle
 
 [GitHub](https://github.com/digital-blueprint/relay-authentic-document-bundle) |
 [Frontend Application](https://gitlab.tugraz.at/dbp/authentic-documents/authenticdocument)
 
 There is a corresponding frontend application that uses this API at [Authentic Document Frontend Application](https://gitlab.tugraz.at/dbp/authentic-documents/authenticdocument).
 
-This is a **WORK IN PROGRESS** and not meant for public use!
+This is a **WORK IN PROGRESS** and not meant for public use yet!
 
 This Symfony 4.4 bundle provides API endpoints for
 
@@ -21,7 +21,7 @@ for the API-Gateway.
 
 ### Step 1
 
-Copy this bundle to `./bundles/api-authentic-document-bundle`
+Copy this bundle to `./bundles/relay-authentic-document-bundle`
 
 ### Step 2
 
@@ -31,7 +31,7 @@ Enable this bundle in `./config/bundles.php` by adding this element to the array
 ...
     return [
         ...
-        DBP\API\AuthenticDocumentBundle\DbpAuthenticDocumentBundle::class => ['all' => true],
+        Dbp\Relay\AuthenticDocumentBundle\DbpAuthenticDocumentBundle::class => ['all' => true],
     ];
 }
 ```

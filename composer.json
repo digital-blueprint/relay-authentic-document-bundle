@@ -1,5 +1,5 @@
 {
-    "name": "dbp/api-authentic-document-bundle",
+    "name": "dbp/relay-authentic-document-bundle",
     "type": "symfony-bundle",
     "license": "AGPL-3.0-or-later",
     "require": {
@@ -30,12 +30,6 @@
         "symfony/phpunit-bridge": "^5.4.3",
         "vimeo/psalm": "^4.19"
     },
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "git@gitlab.tugraz.at:dbp/dbp-api/api-base-bundle.git"
-        }
-    ],
     "autoload": {
         "psr-4": {
             "DBP\\API\\AuthenticDocumentBundle\\": "src/"
