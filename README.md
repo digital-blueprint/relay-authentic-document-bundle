@@ -3,6 +3,8 @@
 [GitHub](https://github.com/digital-blueprint/relay-authentic-documents-bundle) |
 [Frontend Application](https://gitlab.tugraz.at/dbp/authentic-documents/authenticdocument)
 
+[![Test](https://github.com/digital-blueprint/relay-authentic-documents-bundle/actions/workflows/test.yml/badge.svg)](https://github.com/digital-blueprint/relay-authentic-documents-bundle/actions/workflows/test.yml)
+
 There is a corresponding frontend application that uses this API at [Authentic Document Frontend Application](https://gitlab.tugraz.at/dbp/authentic-documents/authenticdocument).
 
 This is a **WORK IN PROGRESS** and not meant for public use yet!
