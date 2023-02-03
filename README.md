@@ -1,6 +1,6 @@
 # DbpAuthenticDocumentBundle
 
-[GitHub](https://github.com/digital-blueprint/relay-authentic-document-bundle) |
+[GitHub](https://github.com/digital-blueprint/relay-authentic-documents-bundle) |
 [Frontend Application](https://gitlab.tugraz.at/dbp/authentic-documents/authenticdocument)
 
 There is a corresponding frontend application that uses this API at [Authentic Document Frontend Application](https://gitlab.tugraz.at/dbp/authentic-documents/authenticdocument).
@@ -21,7 +21,7 @@ for the API-Gateway.
 
 ### Step 1
 
-Copy this bundle to `./bundles/relay-authentic-document-bundle`
+Copy this bundle to `./bundles/relay-authentic-documents-bundle`
 
 ### Step 2
 
@@ -42,7 +42,7 @@ Add this bundle to `./symfony.lock`:
 
 ```json
 ...
-    "dbp/api-authentic-document-bundle": {
+    "dbp/api-authentic-documents-bundle": {
         "version": "dev-master"
     },
 ...
